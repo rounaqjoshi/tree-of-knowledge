@@ -1,13 +1,13 @@
 {
-  "name": "The Tree of Knowledge",
+  "name": "The Tree of Knowledge — Stories by Ronnie",
   "short_name": "Tree of Knowledge",
   "description": "A timeline of human discovery — Matter · Form · Connection",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#f6f6f3",
-  "theme_color": "#1d2127",
+  "background_color": "#f3ecdd",
+  "theme_color": "#0b1124",
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
     { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
