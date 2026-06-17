@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tree of Knowledge — a timeline of human discovery</title>
+<meta name="theme-color" content="#1d2127">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tree of Knowledge">
+<style>
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%}
+:root{
+  --bg:#f6f6f3; --panel:#ffffff; --panel2:#fbfbfa;
+  --ink:#1d2127; --ink-soft:#646b74; --ink-faint:#8b919a;
+  --line:#e6e6e1; --line2:#d6d7d1;
+  --matter:#bf8a2e; --form:#c25a47; --connection:#3f8e6e;
+  --matter-soft:#f3e7cf; --form-soft:#f4ddd6; --connection-soft:#d8ecdf;
+  --shadow:0 1px 2px rgba(20,25,30,.06),0 4px 14px rgba(20,25,30,.06);
+  --shadow-lg:0 12px 44px rgba(20,25,30,.20);
+  --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --serif:"Iowan Old Style","Palatino Linotype",Georgia,"Times New Roman",serif;
+}
+body{font-family:var(--sans);color:var(--ink);background:var(--bg);font-size:14px;-webkit-font-smoothing:antialiased}
+
+header.top{position:sticky;top:0;z-index:40;background:rgba(246,246,243,.88);backdrop-filter:saturate(1.3) blur(8px);border-bottom:1px solid var(--line)}
+.top-row{display:flex;align-items:center;gap:16px;padding:12px 20px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:12px}
+.logo .mark{width:36px;height:36px;border-radius:9px;flex:0 0 auto;background:conic-gradient(from 210deg,var(--matter),var(--form),var(--connection),var(--matter));display:grid;place-items:center;color:#fff;font-size:16px;box-shadow:var(--shadow)}
+.logo h1{font-family:var(--serif);font-size:19px;margin:0;letter-spacing:-.2px;font-weight:600;line-height:1}
+.logo .sub{font-size:11.5px;color:var(--ink-soft);margin-top:3px}
+.tabs{display:flex;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px}
+.tab{font-size:13px;border:0;background:transparent;color:var(--ink-soft);padding:7px 14px;border-radius:999px;cursor:pointer;transition:.15s;font-weight:500;white-space:nowrap}
+.tab:hover{color:var(--ink)}
+.tab.active{background:var(--ink);color:#fff}
+.controls{display:flex;align-items:center;gap:9px;margin-left:auto;flex-wrap:wrap}
+.search{display:flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:7px 13px;min-width:200px}
+.search input{border:0;outline:0;background:transparent;font-size:13.5px;width:100%;color:var(--ink);font-family:inherit}
+.daterange{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft)}
+.daterange input{width:72px;border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:13px;background:var(--panel);text-align:center;color:var(--ink);font-family:inherit}
+.btn{font-size:12.5px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:7px 12px;border-radius:999px;cursor:pointer;transition:.15s;font-weight:500;white-space:nowrap}
+.btn:hover{border-color:var(--line2);background:var(--panel2)}
+.btn.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.legend{display:flex;gap:18px;align-items:center;padding:0 20px 12px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-soft)}
+.legend .grp{display:flex;align-items:center;gap:7px}
+.legend b{font-weight:600}
+.swatch{width:11px;height:11px;border-radius:3px}
+.conn-key{display:flex;align-items:center;gap:7px}
+.legend svg{display:block}
+
+.hint{font-size:12px;color:var(--ink-faint);padding:10px 20px 4px}
+
+#timeline-view{position:relative}
+.scroll-wrap{overflow:auto;position:relative;border-top:1px solid var(--line)}
+.scene{position:relative}
+.axis{position:sticky;top:0;z-index:25;height:38px;background:var(--panel)}
+.axis .tick{position:absolute;top:0;height:38px;border-left:1px solid var(--line)}
+.axis .tick span{position:absolute;top:11px;left:7px;font-size:11.5px;font-weight:600;color:var(--ink-soft);white-space:nowrap}
+.gridlines{position:absolute;top:0;left:0;height:100%;width:100%;pointer-events:none;z-index:1}
+.gridlines .g{position:absolute;top:0;bottom:0;border-left:1px solid rgba(20,25,30,.045)}
+
+.branch{position:relative;z-index:2;border-top:1px solid var(--line2)}
+.branch-head{position:sticky;left:0;z-index:24;display:flex;align-items:center;gap:11px;padding:16px 20px 9px}
+.branch-head .bar{width:5px;height:26px;border-radius:3px}
+.branch-head h2{font-family:var(--serif);margin:0;font-size:18px;font-weight:600;letter-spacing:-.2px}
+.branch-head .tag{font-size:11px;color:#fff;padding:3px 9px;border-radius:999px;font-weight:600}
+.branch-head .def{font-size:12px;color:var(--ink-faint)}
+.branch-head .collapse{margin-left:4px}
+.branch.collapsed .branch-body{display:none}
+
+.track{position:relative;border-top:1px dashed var(--line)}
+.label{position:sticky;left:0;z-index:23;width:0;height:0}
+.label-inner{position:sticky;left:10px;display:inline-flex;flex-direction:column;gap:2px;background:var(--panel);border:1px solid var(--line);border-left:4px solid;border-radius:10px;padding:7px 11px;margin:9px;box-shadow:var(--shadow);max-width:168px;z-index:23}
+.label-inner b{font-size:13px;line-height:1.1;font-weight:600}
+.label-inner small{font-size:10px;color:var(--ink-soft);line-height:1.25}
+.label-inner .latest{margin-top:5px;font-size:10px;border:1px solid var(--line);background:var(--panel2);border-radius:999px;padding:3px 9px;cursor:pointer;align-self:flex-start;color:var(--ink-soft);text-decoration:none;font-weight:500}
+.label-inner .latest:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+.lane{position:relative}
+
+.card{position:absolute;width:158px;border-radius:10px;background:var(--panel);cursor:pointer;border:1px solid var(--line);border-top:3px solid var(--line2);box-shadow:var(--shadow);padding:8px 10px;transition:transform .12s,box-shadow .12s,opacity .12s,border-color .12s;overflow:hidden;z-index:5}
+.card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);z-index:9}
+.card .yr{font-family:var(--serif);font-weight:600;font-size:13px;line-height:1}
+.card .ti{font-size:12px;font-weight:600;margin:3px 0 3px;line-height:1.22;color:var(--ink)}
+.card .meta{font-size:10px;color:var(--ink-soft);line-height:1.2;display:flex;align-items:center;gap:4px}
+.card .flag{font-size:10px}
+.card.dim{opacity:.12}
+.card.focus{box-shadow:0 0 0 2px var(--ink);z-index:12}
+
+#connectors{position:absolute;top:0;left:0;pointer-events:none;z-index:4;overflow:visible}
+#connectors path{fill:none;stroke-width:1.4;opacity:.4}
+#connectors path.hot{opacity:1;stroke-width:2.4}
+
+.modal-back{position:fixed;inset:0;z-index:100;background:rgba(20,25,30,.45);display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(2px)}
+.modal-back.show{display:flex}
+.modal{background:var(--panel);max-width:560px;width:100%;border-radius:16px;border-top:4px solid var(--line2);box-shadow:var(--shadow-lg);max-height:86vh;overflow:auto;position:relative}
+.modal .x{position:absolute;top:12px;right:16px;border:0;background:transparent;font-size:24px;cursor:pointer;color:var(--ink-faint);line-height:1}
+.modal .x:hover{color:var(--ink)}
+.modal .body{padding:24px 28px 26px}
+.modal .kicker{font-size:11px;letter-spacing:.8px;text-transform:uppercase;font-weight:700}
+.modal h3{font-family:var(--serif);font-size:24px;margin:7px 0 4px;line-height:1.15;font-weight:600}
+.modal .yr{font-size:14px;color:var(--ink-soft);margin-bottom:16px;font-weight:500}
+.modal .row{display:flex;gap:10px;margin:8px 0;font-size:14px}
+.modal .row b{flex:0 0 92px;color:var(--ink-faint);font-weight:600}
+.modal .why{margin:16px 0;font-size:15px;line-height:1.55;padding:13px 15px;background:var(--panel2);border:1px solid var(--line);border-radius:10px}
+.modal .chain{font-size:12.5px;color:var(--ink-soft);margin:9px 0}
+.modal .chain a{color:var(--ink);cursor:pointer;text-decoration:underline;text-decoration-color:var(--line2);text-underline-offset:2px}
+.modal .chain a:hover{text-decoration-color:var(--ink)}
+.links h4{font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--ink-faint);margin:18px 0 9px;font-weight:700}
+.links .lk{display:inline-block;margin:0 7px 7px 0;text-decoration:none;font-size:13px;border:1px solid var(--line);border-radius:999px;padding:8px 14px;color:var(--ink);background:var(--panel);transition:.15s;font-weight:500}
+.links .lk:hover{background:var(--panel2);border-color:var(--line2)}
+.links .lk.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.links .lk.primary:hover{opacity:.9}
+.note{font-size:11.5px;color:var(--ink-faint);margin-top:13px;line-height:1.5}
+
+#socio-view{display:none;max-width:920px;margin:0 auto;padding:30px 22px 90px}
+#socio-view.show{display:block}
+.socio-intro{font-size:15px;line-height:1.6;margin-bottom:30px;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--connection);border-radius:14px;padding:22px 26px;box-shadow:var(--shadow)}
+.socio-intro h2{font-family:var(--serif);margin:0 0 10px;font-size:25px;font-weight:600}
+.socio-timeline{position:relative;margin-left:12px;border-left:2px solid var(--line2)}
+.scard{position:relative;margin:0 0 24px 30px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 22px;box-shadow:var(--shadow)}
+.scard::before{content:"";position:absolute;left:-40px;top:22px;width:13px;height:13px;border-radius:50%;background:var(--connection);box-shadow:0 0 0 4px var(--bg)}
+.scard .yr{font-weight:700;color:var(--connection);font-size:13px;letter-spacing:.3px}
+.scard h3{font-family:var(--serif);margin:4px 0 3px;font-size:19px;font-weight:600}
+.scard .who{font-size:12.5px;color:var(--ink-soft);margin-bottom:10px}
+.scard p{font-size:14px;line-height:1.55;margin:9px 0}
+.scard .built{font-size:13px;color:var(--ink-soft);font-style:italic;margin:9px 0}
+.scard .links{margin-top:8px}
+.era{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--connection);margin:6px 0 18px 30px;font-weight:700}
+
+footer{border-top:1px solid var(--line);background:var(--panel);padding:24px 28px;font-size:12.5px;color:var(--ink-soft);line-height:1.65}
+footer b{color:var(--ink)}
+footer code{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:12px}
+
+::-webkit-scrollbar{height:12px;width:12px}
+::-webkit-scrollbar-thumb{background:var(--line2);border-radius:8px;border:3px solid var(--bg)}
+::-webkit-scrollbar-track{background:transparent}
+
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-row">
+    <div class="logo">
+      <div class="mark">✦</div>
+      <div>
+        <h1>The Tree of Knowledge</h1>
+        <div class="sub">A timeline of human discovery — Matter · Form · Connection</div>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-view="timeline">Timeline</button>
+      <button class="tab" data-view="socio">Sociology — the science of us</button>
+    </div>
+    <div class="controls">
+      <div class="search">
+        <span>🔍</span>
+        <input id="search" type="text" placeholder="Search people, work, place…">
+      </div>
+      <div class="daterange">
+        <span>from</span><input id="from" type="number" value="-3000" step="10">
+        <span>to</span><input id="to" type="number" value="2026" step="10">
+      </div>
+      <button class="btn on" id="toggleConn">Connectors: on</button>
+      <button class="btn" id="resetBtn">Reset</button>
+    </div>
+  </div>
+  <div class="legend">
+    <div class="grp"><span class="swatch" style="background:var(--matter)"></span><b style="color:var(--matter)">MATTER</b> · Science</div>
+    <div class="grp"><span class="swatch" style="background:var(--form)"></span><b style="color:var(--form)">FORM</b> · Metascience</div>
+    <div class="grp"><span class="swatch" style="background:var(--connection)"></span><b style="color:var(--connection)">CONNECTION</b> · Social science</div>
+    <div class="conn-key">
+      <svg width="40" height="12"><line x1="0" y1="6" x2="32" y2="6" stroke="#6a5a45" stroke-width="2" stroke-dasharray="5 4"/><polygon points="32,1 40,6 32,11" fill="#6a5a45"/></svg>
+      builds on → led to
+    </div>
+    <div class="grp" style="font-style:italic">Click any card for detail &amp; the free paper.</div>
+  </div>
+</header>
+
+<div class="hint" id="tlHint">Scroll sideways to move through time → modern era is expanded so the last 50 years has room to breathe. Click a branch heading to collapse it.</div>
+
+<section id="timeline-view">
+  <div class="scroll-wrap" id="scroll">
+    <div class="scene" id="scene">
+      <div class="axis" id="axis"></div>
+      <div class="gridlines" id="grid"></div>
+      <svg id="connectors"></svg>
+      <div id="branches"></div>
+    </div>
+  </div>
+</section>
+
+<section id="socio-view"></section>
+
+<div class="modal-back" id="modalBack">
+  <div class="modal" id="modal">
+    <button class="x" id="modalX">×</button>
+    <div class="body" id="modalBody"></div>
+  </div>
+</div>
+
+<footer>
+  <div><b>About this map.</b> Organised strictly by a personal taxonomy — three branches (Matter / Form / Connection), 21 disciplines — not conventional academic categories. The unconventional placement is the point. Each card carries the year, the person(s), their institution <i>and</i> country, and one line on why it mattered. Dashed arrows show "builds on → led to" lineage within and across branches.</div>
+  <div style="margin-top:10px"><b>Links &amp; honesty.</b> Where a free full text is reliably available it's linked directly (arXiv, PubMed Central, W3C, APS open letters, author/lab pages). Otherwise every card opens pre-filtered searches on <b>OpenAlex</b>, <b>CORE</b>, <b>Semantic Scholar</b> and <b>Google Scholar</b> — these always resolve to current free results, so you never hit a dead link. "Latest research" buttons open live field feeds (arXiv, bioRxiv, PsyArXiv, SocArXiv, ChemRxiv, PhilPapers, RePEc). A few older or paywalled landmark works link to search rather than a single PDF on purpose — better an honest search than a fabricated link.</div>
+  <div style="margin-top:10px"><b>Refreshing.</b> A static file can't update its own curated "recent breakthroughs." To refresh the curated content, re-run the prompt that generated this file and I'll rebuild it with newer milestones. The "Latest research" buttons, by contrast, are always live.</div>
+  <div style="margin-top:10px"><b>Install it as an app.</b> Once hosted, use your browser's "Install app" / "Add to Home Screen" option to launch it fullscreen and offline.</div>
+  <div style="margin-top:10px;font-style:italic">Built for Ronnie · <span id="builtdate"></span> · accuracy over completeness — corrections welcome.</div>
+</footer>
+
+<script>
+/* ============================================================
+   DATA
+   ============================================================ */
+const BRANCHES = [
+  {key:"matter", name:"MATTER", sub:"Science", color:"var(--matter)", raw:"#bf8a2e",
+    disciplines:["Chemistry","Physics","Biology","Engineering","Geology","Astronomy","Architecture"]},
+  {key:"form", name:"FORM", sub:"Metascience", color:"var(--form)", raw:"#c25a47",
+    disciplines:["Metaphysics","Neuroscience","Microbiology","Quantum","Psychology","Mathematics","Metanomics"]},
+  {key:"connection", name:"CONNECTION", sub:"Social science", color:"var(--connection)", raw:"#3f8e6e",
+    disciplines:["Languages","History","Sociology","Art","Music","Rhetoric","Dance"]}
+];
+
+const DISC = {
+  // MATTER
+  "Chemistry":{def:"study of elements & their mixtures", latest:["ChemRxiv (live)","https://chemrxiv.org/engage/chemrxiv/search-dashboard"]},
+  "Physics":{def:"study of quality & quantity of bodies", latest:["arXiv physics (live)","https://arxiv.org/list/physics/recent"]},
+  "Biology":{def:"study of inner/outer working of natural bodies", latest:["bioRxiv (live)","https://www.biorxiv.org/"]},
+  "Engineering":{def:"study of inner/outer workings of a body", latest:["arXiv eess (live)","https://arxiv.org/list/eess/recent"]},
+  "Geology":{def:"study of non-living bodies", latest:["EarthArXiv (live)","https://eartharxiv.org/repository/"]},
+  "Astronomy":{def:"study of quality & quantity of heavenly bodies", latest:["arXiv astro-ph (live)","https://arxiv.org/list/astro-ph/recent"]},
+  "Architecture":{def:"design/construction of bodies", latest:["CORE search (live)","https://core.ac.uk/search?q=architecture"]},
+  // FORM
+  "Metaphysics":{def:"study of energy, causes & effects", latest:["PhilPapers metaphysics (live)","https://philpapers.org/browse/metaphysics"]},
+  "Neuroscience":{def:"study of information in natural living bodies", latest:["bioRxiv neuroscience (live)","https://www.biorxiv.org/collection/neuroscience"]},
+  "Microbiology":{def:"study of energy in natural living bodies", latest:["bioRxiv microbiology (live)","https://www.biorxiv.org/collection/microbiology"]},
+  "Quantum":{def:"study of atoms, space & time", latest:["arXiv quant-ph (live)","https://arxiv.org/list/quant-ph/recent"]},
+  "Psychology":{def:"study of human behaviour", latest:["PsyArXiv (live)","https://osf.io/preprints/psyarxiv"]},
+  "Mathematics":{def:"study and use of numbers in nature", latest:["arXiv math (live)","https://arxiv.org/list/math/recent"]},
+  "Metanomics":{def:"study of systems in nature", latest:["arXiv econ + RePEc (live)","https://arxiv.org/list/econ/recent"]},
+  // CONNECTION
+  "Languages":{def:"study of communication", latest:["LingBuzz (live)","https://ling.auf.net/lingbuzz"]},
+  "History":{def:"study of causes & effects through linear time", latest:["CORE search (live)","https://core.ac.uk/search?q=historiography"]},
+  "Sociology":{def:"study of human society", latest:["SocArXiv (live)","https://osf.io/preprints/socarxiv"]},
+  "Art":{def:"study of visual language & colour", latest:["CORE search (live)","https://core.ac.uk/search?q=art+history"]},
+  "Music":{def:"play/study of melody & sound", latest:["CORE search (live)","https://core.ac.uk/search?q=music+theory"]},
+  "Rhetoric":{def:"use of language in persuasion", latest:["CORE search (live)","https://core.ac.uk/search?q=rhetoric"]},
+  "Dance":{def:"use/study of communication through melody + bodies", latest:["CORE search (live)","https://core.ac.uk/search?q=dance+studies"]}
+};
+
+// Each milestone: id, d(iscipline), y(ear), t(itle), p(eople), i(nstitution), c(ountry flag+name),
+// w(hy), link(direct free url, optional), b(uilds_on ids, optional)
+const M = [
+/* ===================== CHEMISTRY ===================== */
+{id:"chem_lavoisier", d:"Chemistry", y:1789, t:"Conservation of mass & oxygen theory", p:"Antoine Lavoisier", i:"Académie des sciences", c:"🇫🇷 France", w:"Killed phlogiston; turned chemistry into a quantitative, element-based science."},
+{id:"chem_dalton", d:"Chemistry", y:1808, t:"Atomic theory of matter", p:"John Dalton", i:"Manchester Lit & Phil", c:"🇬🇧 UK", w:"Matter is made of indivisible atoms with fixed weights — the foundation of all chemistry."},
+{id:"chem_mendeleev", d:"Chemistry", y:1869, t:"The periodic table", p:"Dmitri Mendeleev", i:"St Petersburg University", c:"🇷🇺 Russia", w:"Ordered the elements so well it predicted ones not yet discovered.", b:["chem_dalton"]},
+{id:"chem_curie", d:"Chemistry", y:1898, t:"Radioactivity; polonium & radium", p:"Marie & Pierre Curie", i:"University of Paris", c:"🇫🇷 France", w:"Opened the atom's interior and a new chemistry of unstable elements."},
+{id:"chem_haber", d:"Chemistry", y:1909, t:"Haber–Bosch ammonia synthesis", p:"Fritz Haber, Carl Bosch", i:"BASF / Karlsruhe", c:"🇩🇪 Germany", w:"Pulled fertiliser from the air — feeds roughly half the planet today."},
+{id:"chem_pauling", d:"Chemistry", y:1931, t:"The nature of the chemical bond", p:"Linus Pauling", i:"Caltech", c:"🇺🇸 USA", w:"Used quantum mechanics to explain why atoms bond — the logic of molecules.", b:["q_schrodinger"]},
+{id:"chem_fullerene", d:"Chemistry", y:1985, t:"Buckminsterfullerene (C₆₀)", p:"Kroto, Curl, Smalley", i:"Sussex / Rice University", c:"🇬🇧🇺🇸 UK/USA", w:"A football-shaped carbon molecule that launched nanochemistry."},
+{id:"chem_liion", d:"Chemistry", y:1980, t:"Lithium-ion cathode (LiCoO₂)", p:"John Goodenough, M. S. Whittingham, A. Yoshino", i:"University of Oxford", c:"🇬🇧 UK", w:"The chemistry behind every phone, laptop and EV battery.", b:["chem_mendeleev"]},
+{id:"chem_greenfluor", d:"Chemistry", y:2008, t:"Green fluorescent protein chemistry", p:"Shimomura, Chalfie, Tsien", i:"UC San Diego / Columbia", c:"🇺🇸🇯🇵 USA/Japan", w:"Made living cells glow on command — a universal biological tag."},
+
+/* ===================== PHYSICS ===================== */
+{id:"phy_galileo", d:"Physics", y:1638, t:"Laws of motion & falling bodies", p:"Galileo Galilei", i:"University of Padua", c:"🇮🇹 Italy", w:"Replaced Aristotle's physics with measurement and experiment."},
+{id:"phy_newton", d:"Physics", y:1687, t:"Principia: gravity & mechanics", p:"Isaac Newton", i:"University of Cambridge", c:"🇬🇧 UK", w:"One set of laws for apples and planets — the template for all physical science.", b:["phy_galileo","astro_kepler"]},
+{id:"phy_carnot", d:"Physics", y:1824, t:"Thermodynamics & the heat engine", p:"Sadi Carnot", i:"École Polytechnique", c:"🇫🇷 France", w:"Set the ultimate limit on how much work heat can do — birthed thermodynamics."},
+{id:"phy_faraday", d:"Physics", y:1831, t:"Electromagnetic induction", p:"Michael Faraday", i:"Royal Institution", c:"🇬🇧 UK", w:"Moving magnets make current — the principle behind every generator and motor."},
+{id:"phy_maxwell", d:"Physics", y:1865, t:"Maxwell's equations of electromagnetism", p:"James Clerk Maxwell", i:"King's College London", c:"🇬🇧 UK", w:"Unified electricity, magnetism and light into four equations.", b:["phy_faraday"]},
+{id:"phy_rutherford", d:"Physics", y:1911, t:"The atomic nucleus", p:"Ernest Rutherford", i:"University of Manchester", c:"🇬🇧 UK", w:"Fired particles at gold foil and found the atom is mostly empty space around a dense nucleus."},
+{id:"phy_relativity", d:"Physics", y:1915, t:"General relativity", p:"Albert Einstein", i:"Prussian Academy, Berlin", c:"🇩🇪 Germany", w:"Gravity is curved spacetime — reshaped our picture of the cosmos.", b:["phy_maxwell","phy_newton"]},
+{id:"phy_transistor", d:"Physics", y:1947, t:"The transistor", p:"Bardeen, Brattain, Shockley", i:"Bell Labs", c:"🇺🇸 USA", w:"The switch that made all modern electronics possible.", b:["q_schrodinger"]},
+{id:"phy_bcs", d:"Physics", y:1957, t:"BCS theory of superconductivity", p:"Bardeen, Cooper, Schrieffer", i:"University of Illinois", c:"🇺🇸 USA", w:"Explained why some metals lose all resistance when cold."},
+{id:"phy_higgs_th", d:"Physics", y:1964, t:"The Higgs mechanism (theory)", p:"Higgs; Englert & Brout", i:"Edinburgh / Université libre de Bruxelles", c:"🇬🇧🇧🇪 UK/Belgium", w:"Predicted the field that gives particles mass.", searchq:"Higgs broken symmetries gauge vector mesons 1964 Physical Review Letters"},
+{id:"phy_graphene", d:"Physics", y:2004, t:"Isolation of graphene", p:"Andre Geim, Konstantin Novoselov", i:"University of Manchester", c:"🇬🇧 UK", w:"A one-atom-thick sheet of carbon, stronger than steel — peeled off with sticky tape.", link:"https://arxiv.org/abs/cond-mat/0410550"},
+{id:"phy_higgs_disc", d:"Physics", y:2012, t:"Discovery of the Higgs boson", p:"ATLAS & CMS collaborations", i:"CERN", c:"🇨🇭 CERN (intl.)", w:"Confirmed the last missing piece of the Standard Model.", link:"https://arxiv.org/abs/1207.7214", b:["phy_higgs_th"]},
+{id:"phy_ligo", d:"Physics", y:2016, t:"Gravitational waves detected (GW150914)", p:"LIGO Scientific Collaboration", i:"Caltech / MIT", c:"🇺🇸 USA (intl.)", w:"Heard two black holes collide — a century after Einstein predicted the ripples.", link:"https://arxiv.org/abs/1602.03837", b:["phy_relativity"]},
+
+/* ===================== BIOLOGY ===================== */
+{id:"bio_harvey", d:"Biology", y:1628, t:"Circulation of the blood", p:"William Harvey", i:"College of Physicians, London", c:"🇬🇧 UK", w:"Showed the heart pumps blood in a closed loop — modern physiology begins."},
+{id:"bio_linnaeus", d:"Biology", y:1735, t:"Binomial classification (Systema Naturae)", p:"Carl Linnaeus", i:"Uppsala University", c:"🇸🇪 Sweden", w:"Gave every species a two-word name and a place in a system of life."},
+{id:"bio_darwin", d:"Biology", y:1859, t:"Evolution by natural selection", p:"Charles Darwin", i:"independent / Down House", c:"🇬🇧 UK", w:"One mechanism — descent with modification — explains the whole tree of life."},
+{id:"bio_mendel", d:"Biology", y:1866, t:"Laws of inheritance", p:"Gregor Mendel", i:"Abbey of St Thomas, Brno", c:"🇨🇿 Czechia", w:"Traits pass in discrete units — the seed of genetics, ignored for 35 years."},
+{id:"bio_xray", d:"Biology", y:1913, t:"X-ray crystallography", p:"William & Lawrence Bragg", i:"University of Manchester / Cambridge", c:"🇬🇧 UK", w:"Let us read the 3-D atomic structure of crystals and, later, molecules of life."},
+{id:"bio_krebs", d:"Biology", y:1937, t:"The Krebs (citric acid) cycle", p:"Hans Krebs", i:"University of Sheffield", c:"🇬🇧 UK", w:"Mapped how cells turn food into energy."},
+{id:"bio_dna", d:"Biology", y:1953, t:"The double helix structure of DNA", p:"Watson, Crick; Franklin & Wilkins", i:"University of Cambridge / King's College London", c:"🇬🇧 UK", w:"The shape revealed how life copies and stores its instructions.", searchq:"Watson Crick 1953 Molecular Structure Nucleic Acids double helix", b:["bio_xray"]},
+{id:"bio_sanger", d:"Biology", y:1977, t:"DNA sequencing (Sanger method)", p:"Frederick Sanger", i:"MRC Lab of Molecular Biology, Cambridge", c:"🇬🇧 UK", w:"Made it possible to read the order of letters in a genome.", b:["bio_dna"]},
+{id:"bio_hgp", d:"Biology", y:2003, t:"The Human Genome Project", p:"International HGP consortium", i:"Wellcome Sanger / NIH (multinational)", c:"🌍 international", w:"Read all 3 billion letters of human DNA — a shared reference for biology.", b:["bio_sanger"]},
+{id:"bio_ips", d:"Biology", y:2006, t:"Induced pluripotent stem cells (iPSC)", p:"Shinya Yamanaka", i:"Kyoto University", c:"🇯🇵 Japan", w:"Reprogrammed adult cells back to a stem-cell state with four genes."},
+{id:"bio_crispr", d:"Biology", y:2012, t:"CRISPR-Cas9 gene editing", p:"Jennifer Doudna, Emmanuelle Charpentier", i:"UC Berkeley / Umeå University", c:"🇺🇸🇸🇪 USA/Sweden", w:"A programmable molecular scissors that rewrites DNA — cheap and precise.", b:["bio_dna","bio_hgp"]},
+{id:"bio_alphafold", d:"Biology", y:2021, t:"AlphaFold solves protein folding", p:"DeepMind (Jumper, Hassabis)", i:"Google DeepMind", c:"🇬🇧 UK", w:"AI predicted 3-D protein shapes from sequence — a 50-year grand challenge cracked.", link:"https://www.nature.com/articles/s41586-021-03819-2", b:["bio_xray","cs_transformer"]},
+
+/* ===================== ENGINEERING ===================== */
+{id:"eng_watt", d:"Engineering", y:1769, t:"The separate-condenser steam engine", p:"James Watt", i:"University of Glasgow", c:"🇬🇧 UK", w:"Made steam power efficient — the engine of the Industrial Revolution."},
+{id:"eng_telegraph", d:"Engineering", y:1837, t:"The electric telegraph", p:"Cooke & Wheatstone; Morse", i:"King's College London", c:"🇬🇧🇺🇸 UK/USA", w:"First time information moved faster than a messenger — the dawn of telecoms."},
+{id:"eng_bessemer", d:"Engineering", y:1856, t:"Bessemer process for cheap steel", p:"Henry Bessemer", i:"independent, Sheffield", c:"🇬🇧 UK", w:"Mass-produced steel built railways, ships and skyscrapers."},
+{id:"eng_phone", d:"Engineering", y:1876, t:"The telephone", p:"Alexander Graham Bell", i:"Boston University", c:"🇺🇸 USA", w:"Carried the human voice down a wire."},
+{id:"eng_ic", d:"Engineering", y:1958, t:"The integrated circuit", p:"Jack Kilby; Robert Noyce", i:"Texas Instruments / Fairchild", c:"🇺🇸 USA", w:"Put many transistors on one chip — the start of microelectronics.", b:["phy_transistor"]},
+{id:"eng_fibre", d:"Engineering", y:1966, t:"Fibre-optic communication", p:"Charles Kao", i:"Standard Telecommunication Labs", c:"🇬🇧 UK", w:"Showed glass fibres could carry data on light — the backbone of the internet."},
+{id:"eng_micro", d:"Engineering", y:1971, t:"The microprocessor (Intel 4004)", p:"Federico Faggin, Ted Hoff, Masatoshi Shima", i:"Intel", c:"🇺🇸 USA", w:"A whole computer's brain on a single chip.", b:["eng_ic"]},
+{id:"eng_internet", d:"Engineering", y:1974, t:"TCP/IP and the internet", p:"Vint Cerf, Bob Kahn", i:"Stanford / DARPA", c:"🇺🇸 USA", w:"A common language that let separate networks become one network of networks.", b:["eng_micro"]},
+{id:"eng_www", d:"Engineering", y:1989, t:"The World Wide Web", p:"Tim Berners-Lee", i:"CERN", c:"🇨🇭 CERN (intl.)", w:"Links, browsers and URLs turned the internet into something anyone could use.", link:"https://www.w3.org/History/1989/proposal.html", b:["eng_internet"]},
+{id:"eng_led", d:"Engineering", y:1993, t:"The bright blue LED", p:"Shuji Nakamura; Akasaki & Amano", i:"Nichia Corporation / Nagoya University", c:"🇯🇵 Japan", w:"The missing colour that finally made white LED lighting possible."},
+{id:"eng_iphone", d:"Engineering", y:2007, t:"The smartphone (iPhone)", p:"Apple Inc.", i:"Apple", c:"🇺🇸 USA", w:"Put the internet, a camera and a computer in everyone's pocket.", b:["eng_micro","eng_internet"]},
+{id:"eng_falcon", d:"Engineering", y:2015, t:"Reusable orbital rockets", p:"SpaceX", i:"SpaceX", c:"🇺🇸 USA", w:"Landed and reflew a booster — cut the cost of reaching orbit by an order of magnitude."},
+{id:"cs_alexnet", d:"Engineering", y:2012, t:"Deep learning breaks through (AlexNet)", p:"Krizhevsky, Sutskever, Hinton", i:"University of Toronto", c:"🇨🇦 Canada", w:"A GPU-trained neural net crushed image recognition — the spark of the modern AI boom.", searchq:"ImageNet classification deep convolutional neural networks Krizhevsky Hinton 2012", b:["eng_micro"]},
+
+/* ===================== GEOLOGY ===================== */
+{id:"geo_steno", d:"Geology", y:1669, t:"Laws of stratigraphy", p:"Nicolas Steno", i:"court of Tuscany, Florence", c:"🇩🇰🇮🇹 Denmark/Italy", w:"Rock layers form in time order — the idea that rocks record history."},
+{id:"geo_hutton", d:"Geology", y:1788, t:"Deep time & uniformitarianism", p:"James Hutton", i:"Edinburgh", c:"🏴 Scotland", w:"Earth is unimaginably old, shaped by slow processes still acting today."},
+{id:"geo_lyell", d:"Geology", y:1830, t:"Principles of Geology", p:"Charles Lyell", i:"King's College London", c:"🇬🇧 UK", w:"Systematised geology and gave Darwin the timescale evolution needed.", b:["geo_hutton"]},
+{id:"geo_holmes", d:"Geology", y:1913, t:"Radiometric dating of rocks", p:"Arthur Holmes", i:"Imperial College London", c:"🇬🇧 UK", w:"Used radioactivity to put real numbers on Earth's age — billions of years."},
+{id:"geo_wegener", d:"Geology", y:1912, t:"Continental drift", p:"Alfred Wegener", i:"University of Marburg", c:"🇩🇪 Germany", w:"Proposed continents move — ridiculed for 50 years, then vindicated."},
+{id:"geo_richter", d:"Geology", y:1935, t:"The earthquake magnitude scale", p:"Charles Richter, Beno Gutenberg", i:"Caltech", c:"🇺🇸 USA", w:"Gave earthquakes a single comparable number."},
+{id:"geo_tectonics", d:"Geology", y:1963, t:"Plate tectonics (seafloor spreading)", p:"Vine, Matthews; Hess", i:"University of Cambridge / Princeton", c:"🇬🇧🇺🇸 UK/USA", w:"Magnetic stripes on the seafloor proved Wegener right — one theory for the solid Earth.", b:["geo_wegener"]},
+
+/* ===================== ASTRONOMY ===================== */
+{id:"astro_copernicus", d:"Astronomy", y:1543, t:"Heliocentric solar system", p:"Nicolaus Copernicus", i:"University of Kraków", c:"🇵🇱 Poland", w:"Put the Sun, not Earth, at the centre — and demoted humanity's address."},
+{id:"astro_kepler", d:"Astronomy", y:1609, t:"Laws of planetary motion", p:"Johannes Kepler", i:"Imperial court, Prague", c:"🇩🇪🇨🇿 Germany/Bohemia", w:"Planets travel in ellipses — exact maths replaced perfect circles.", b:["astro_copernicus"]},
+{id:"astro_galileo", d:"Astronomy", y:1610, t:"Telescopic astronomy", p:"Galileo Galilei", i:"University of Padua", c:"🇮🇹 Italy", w:"Moons of Jupiter and phases of Venus — direct evidence the Earth isn't central."},
+{id:"astro_herschel", d:"Astronomy", y:1781, t:"Discovery of Uranus", p:"William & Caroline Herschel", i:"independent, Bath", c:"🇬🇧 UK", w:"First planet found with a telescope — the solar system grew."},
+{id:"astro_hubble", d:"Astronomy", y:1929, t:"The expanding universe", p:"Edwin Hubble", i:"Mount Wilson Observatory", c:"🇺🇸 USA", w:"Galaxies fly apart — evidence the universe had a beginning."},
+{id:"astro_cmb", d:"Astronomy", y:1965, t:"Cosmic microwave background", p:"Arno Penzias, Robert Wilson", i:"Bell Labs", c:"🇺🇸 USA", w:"The afterglow of the Big Bang, found by accident."},
+{id:"astro_exoplanet", d:"Astronomy", y:1995, t:"First exoplanet round a Sun-like star", p:"Michel Mayor, Didier Queloz", i:"University of Geneva", c:"🇨🇭 Switzerland", w:"Proved other stars have planets — there could be billions of worlds."},
+{id:"astro_eht", d:"Astronomy", y:2019, t:"First image of a black hole", p:"Event Horizon Telescope", i:"global VLBI network", c:"🌍 international", w:"Photographed the shadow of M87's black hole using a planet-sized virtual telescope.", b:["phy_relativity"]},
+{id:"astro_jwst", d:"Astronomy", y:2022, t:"James Webb Space Telescope first light", p:"NASA / ESA / CSA", i:"Space Telescope Science Institute", c:"🌍 international", w:"Sees the earliest galaxies in infrared — the deepest view of the cosmos yet."},
+
+/* ===================== ARCHITECTURE ===================== */
+{id:"arch_imhotep", d:"Architecture", y:-2630, t:"The Step Pyramid (first monumental stone)", p:"Imhotep", i:"royal court of Djoser", c:"🇪🇬 Egypt", w:"The first named architect; turned mud-brick tradition into engineered stone."},
+{id:"arch_pantheon", d:"Architecture", y:126, t:"The Pantheon's concrete dome", p:"builders of Hadrian", i:"Imperial Rome", c:"🇮🇹 Rome", w:"Still the world's largest unreinforced concrete dome, 1,900 years on."},
+{id:"arch_gothic", d:"Architecture", y:1144, t:"Gothic structure (Saint-Denis)", p:"Abbot Suger & masons", i:"Abbey of Saint-Denis", c:"🇫🇷 France", w:"Pointed arch, rib vault and flying buttress let walls open into glass and light."},
+{id:"arch_brunelleschi", d:"Architecture", y:1436, t:"Dome of Florence Cathedral", p:"Filippo Brunelleschi", i:"Opera del Duomo, Florence", c:"🇮🇹 Italy", w:"Built the largest masonry dome ever, with no centring — engineering as art."},
+{id:"arch_crystal", d:"Architecture", y:1851, t:"The Crystal Palace (prefabricated iron & glass)", p:"Joseph Paxton", i:"commissioned, London", c:"🇬🇧 UK", w:"Modular, mass-produced parts built a vast hall in months — modern construction begins."},
+{id:"arch_skyscraper", d:"Architecture", y:1885, t:"The steel-frame skyscraper", p:"William Le Baron Jenney", i:"Chicago", c:"🇺🇸 USA", w:"A metal skeleton, not the walls, carries the load — cities could finally go up.", b:["eng_bessemer"]},
+{id:"arch_bauhaus", d:"Architecture", y:1919, t:"The Bauhaus & modernism", p:"Walter Gropius", i:"Bauhaus, Weimar", c:"🇩🇪 Germany", w:"Married art, craft and industry — form follows function."},
+{id:"arch_sydney", d:"Architecture", y:1973, t:"Sydney Opera House shells", p:"Jørn Utzon (with Arup)", i:"Sydney", c:"🇦🇺 Australia", w:"Computed shell geometry pushed concrete and engineering into sculpture."},
+{id:"arch_burj", d:"Architecture", y:2010, t:"Burj Khalifa — tallest structure", p:"Adrian Smith / SOM", i:"SOM", c:"🇦🇪 UAE", w:"A buttressed-core design took buildings past 800 metres."},
+
+/* ===================== METAPHYSICS ===================== */
+{id:"meta_aristotle", d:"Metaphysics", y:-350, t:"Metaphysics & the four causes", p:"Aristotle", i:"the Lyceum, Athens", c:"🇬🇷 Greece", w:"Asked what it means for something to exist — and named the field."},
+{id:"meta_aquinas", d:"Metaphysics", y:1274, t:"Summa Theologica", p:"Thomas Aquinas", i:"University of Paris", c:"🇮🇹🇫🇷 Italy/France", w:"Fused Aristotle with Christian theology — the spine of medieval thought."},
+{id:"meta_descartes", d:"Metaphysics", y:1641, t:"Cogito & mind–body dualism", p:"René Descartes", i:"independent, Dutch Republic", c:"🇫🇷 France", w:"\"I think, therefore I am\" — rebuilt knowledge from radical doubt."},
+{id:"meta_spinoza", d:"Metaphysics", y:1677, t:"Ethics — one substance (God/Nature)", p:"Baruch Spinoza", i:"independent, The Hague", c:"🇳🇱 Netherlands", w:"Argued reality is a single substance — a daring monism that still provokes."},
+{id:"meta_leibniz", d:"Metaphysics", y:1714, t:"The Monadology", p:"Gottfried Leibniz", i:"court of Hanover", c:"🇩🇪 Germany", w:"Reality as infinitely many simple minds (monads) — and the best of possible worlds."},
+{id:"meta_kant", d:"Metaphysics", y:1781, t:"Critique of Pure Reason", p:"Immanuel Kant", i:"University of Königsberg", c:"🇩🇪 Germany", w:"We don't see reality raw — the mind structures all experience.", b:["meta_descartes"]},
+{id:"meta_hegel", d:"Metaphysics", y:1807, t:"Phenomenology of Spirit (dialectic)", p:"G. W. F. Hegel", i:"University of Jena", c:"🇩🇪 Germany", w:"History and mind advance through contradiction and resolution.", b:["meta_kant"]},
+{id:"meta_heidegger", d:"Metaphysics", y:1927, t:"Being and Time", p:"Martin Heidegger", i:"University of Marburg", c:"🇩🇪 Germany", w:"Re-asked the oldest question — what is being? — through human existence."},
+{id:"meta_chalmers", d:"Metaphysics", y:1995, t:"The hard problem of consciousness", p:"David Chalmers", i:"University of Arizona / ANU", c:"🇦🇺 Australia", w:"Why is there subjective experience at all? Reframed the modern mind debate."},
+
+/* ===================== NEUROSCIENCE ===================== */
+{id:"neuro_galvani", d:"Neuroscience", y:1791, t:"Animal electricity", p:"Luigi Galvani", i:"University of Bologna", c:"🇮🇹 Italy", w:"Nerves and muscles run on electricity — the start of electrophysiology."},
+{id:"neuro_cajal", d:"Neuroscience", y:1888, t:"The neuron doctrine", p:"Santiago Ramón y Cajal", i:"University of Barcelona", c:"🇪🇸 Spain", w:"The brain is made of separate cells, not a continuous web — modern neuroscience's bedrock."},
+{id:"neuro_hh", d:"Neuroscience", y:1952, t:"The action potential model", p:"Alan Hodgkin, Andrew Huxley", i:"University of Cambridge", c:"🇬🇧 UK", w:"A precise mathematical account of how neurons fire.", b:["neuro_cajal"]},
+{id:"neuro_hubel", d:"Neuroscience", y:1962, t:"How the visual cortex sees", p:"David Hubel, Torsten Wiesel", i:"Harvard Medical School", c:"🇺🇸 USA", w:"Found neurons tuned to edges and angles — the brain builds vision in layers.", b:["neuro_hh"]},
+{id:"neuro_sperry", d:"Neuroscience", y:1968, t:"Split-brain experiments", p:"Roger Sperry", i:"Caltech", c:"🇺🇸 USA", w:"The two hemispheres can act as separate minds."},
+{id:"neuro_okeefe", d:"Neuroscience", y:1971, t:"Place cells & the brain's GPS", p:"John O'Keefe; the Mosers", i:"University College London / NTNU", c:"🇬🇧🇳🇴 UK/Norway", w:"Specific neurons map where you are — an inner cognitive map."},
+{id:"neuro_fmri", d:"Neuroscience", y:1992, t:"Functional MRI (BOLD imaging)", p:"Seiji Ogawa", i:"Bell Labs", c:"🇺🇸🇯🇵 USA/Japan", w:"Let us watch the living human brain at work, non-invasively."},
+{id:"neuro_optogenetics", d:"Neuroscience", y:2005, t:"Optogenetics", p:"Karl Deisseroth, Edward Boyden", i:"Stanford University", c:"🇺🇸 USA", w:"Switch specific neurons on/off with light — cause-and-effect control of circuits.", b:["bio_crispr"]},
+
+/* ===================== MICROBIOLOGY ===================== */
+{id:"micro_leeuwenhoek", d:"Microbiology", y:1676, t:"Discovery of microorganisms", p:"Antonie van Leeuwenhoek", i:"independent, Delft", c:"🇳🇱 Netherlands", w:"Hand-ground lenses revealed a hidden living world of \"animalcules\"."},
+{id:"micro_pasteur", d:"Microbiology", y:1861, t:"Germ theory of disease", p:"Louis Pasteur", i:"École normale supérieure, Paris", c:"🇫🇷 France", w:"Microbes cause disease and spoilage — the basis of hygiene, vaccines and medicine."},
+{id:"micro_koch", d:"Microbiology", y:1882, t:"Koch's postulates & the TB bacillus", p:"Robert Koch", i:"Imperial Health Office, Berlin", c:"🇩🇪 Germany", w:"Rules for proving a specific microbe causes a specific disease.", b:["micro_pasteur"]},
+{id:"micro_beijerinck", d:"Microbiology", y:1898, t:"Discovery of viruses", p:"Martinus Beijerinck", i:"Delft Polytechnic", c:"🇳🇱 Netherlands", w:"Found an infectious agent far smaller than any bacterium."},
+{id:"micro_penicillin", d:"Microbiology", y:1928, t:"Penicillin", p:"Alexander Fleming; Florey & Chain", i:"St Mary's, London / University of Oxford", c:"🇬🇧 UK", w:"The first true antibiotic — turned deadly infections into treatable ones.", b:["micro_koch"]},
+{id:"micro_pcr", d:"Microbiology", y:1983, t:"Polymerase chain reaction (PCR)", p:"Kary Mullis", i:"Cetus Corporation", c:"🇺🇸 USA", w:"Copies any DNA segment billions of times — the workhorse of modern biology.", b:["bio_dna"]},
+{id:"micro_mrna", d:"Microbiology", y:2005, t:"Modified-mRNA platform", p:"Katalin Karikó, Drew Weissman", i:"University of Pennsylvania", c:"🇺🇸🇭🇺 USA/Hungary", w:"Made mRNA safe to use in the body — the basis of COVID vaccines 15 years later.", b:["bio_dna"]},
+
+/* ===================== QUANTUM ===================== */
+{id:"q_planck", d:"Quantum", y:1900, t:"Energy quanta", p:"Max Planck", i:"University of Berlin", c:"🇩🇪 Germany", w:"Energy comes in discrete packets — the reluctant birth of quantum theory."},
+{id:"q_einstein", d:"Quantum", y:1905, t:"The photoelectric effect / photons", p:"Albert Einstein", i:"Patent Office, Bern", c:"🇨🇭 Switzerland", w:"Light itself is quantised — made the quantum real.", b:["q_planck"]},
+{id:"q_bohr", d:"Quantum", y:1913, t:"The quantum atom", p:"Niels Bohr", i:"University of Copenhagen", c:"🇩🇰 Denmark", w:"Electrons sit in fixed energy levels — explained atomic spectra.", b:["q_planck","phy_rutherford"]},
+{id:"q_debroglie", d:"Quantum", y:1924, t:"Matter waves", p:"Louis de Broglie", i:"University of Paris", c:"🇫🇷 France", w:"Particles are also waves — the bridge to wave mechanics."},
+{id:"q_schrodinger", d:"Quantum", y:1926, t:"The wave equation", p:"Erwin Schrödinger", i:"University of Zürich", c:"🇦🇹🇨🇭 Austria/Switzerland", w:"A single equation governs how quantum systems evolve.", b:["q_debroglie"]},
+{id:"q_heisenberg", d:"Quantum", y:1927, t:"The uncertainty principle", p:"Werner Heisenberg", i:"University of Copenhagen", c:"🇩🇪 Germany", w:"You cannot know position and momentum exactly at once — a hard limit on reality.", b:["q_bohr"]},
+{id:"q_dirac", d:"Quantum", y:1928, t:"Relativistic quantum theory & antimatter", p:"Paul Dirac", i:"University of Cambridge", c:"🇬🇧 UK", w:"Merged relativity and quantum mechanics — and predicted antimatter.", b:["q_schrodinger","phy_relativity"]},
+{id:"q_bell", d:"Quantum", y:1964, t:"Bell's theorem", p:"John Stewart Bell", i:"CERN", c:"🇮🇪🇨🇭 Ireland/CERN", w:"Showed entanglement can't be explained by hidden local variables — testable.", b:["q_heisenberg"]},
+{id:"q_aspect", d:"Quantum", y:1982, t:"Tests of entanglement", p:"Alain Aspect", i:"Institut d'Optique, Paris", c:"🇫🇷 France", w:"Experiments confirmed nature really is non-local. (Nobel 2022)", b:["q_bell"]},
+{id:"q_shor", d:"Quantum", y:1994, t:"Shor's quantum algorithm", p:"Peter Shor", i:"Bell Labs", c:"🇺🇸 USA", w:"Proved a quantum computer could break today's encryption — launched the field.", b:["math_turing"]},
+{id:"q_supremacy", d:"Quantum", y:2019, t:"Quantum computational advantage", p:"Google Quantum AI", i:"Google", c:"🇺🇸 USA", w:"A 53-qubit chip did in minutes what classical supercomputers couldn't feasibly do.", b:["q_shor"]},
+
+/* ===================== PSYCHOLOGY ===================== */
+{id:"psy_wundt", d:"Psychology", y:1879, t:"The first psychology laboratory", p:"Wilhelm Wundt", i:"University of Leipzig", c:"🇩🇪 Germany", w:"Made the mind an object of experiment — psychology becomes a science."},
+{id:"psy_james", d:"Psychology", y:1890, t:"Principles of Psychology", p:"William James", i:"Harvard University", c:"🇺🇸 USA", w:"Framed consciousness, habit and emotion for the modern field."},
+{id:"psy_pavlov", d:"Psychology", y:1897, t:"Classical conditioning", p:"Ivan Pavlov", i:"Military Medical Academy, St Petersburg", c:"🇷🇺 Russia", w:"Learning by association — the dog, the bell, the reflex."},
+{id:"psy_freud", d:"Psychology", y:1900, t:"The Interpretation of Dreams", p:"Sigmund Freud", i:"University of Vienna", c:"🇦🇹 Austria", w:"Put the unconscious at the centre of mental life — hugely influential, much contested."},
+{id:"psy_skinner", d:"Psychology", y:1938, t:"Operant conditioning", p:"B. F. Skinner", i:"Harvard University", c:"🇺🇸 USA", w:"Behaviour is shaped by its consequences — reward and punishment.", b:["psy_pavlov"]},
+{id:"psy_festinger", d:"Psychology", y:1957, t:"Cognitive dissonance", p:"Leon Festinger", i:"Stanford University", c:"🇺🇸 USA", w:"We change our beliefs to ease the discomfort of contradiction."},
+{id:"psy_milgram", d:"Psychology", y:1963, t:"Obedience to authority", p:"Stanley Milgram", i:"Yale University", c:"🇺🇸 USA", w:"Ordinary people will inflict harm if an authority tells them to."},
+{id:"psy_kahneman", d:"Psychology", y:1974, t:"Heuristics & biases", p:"Daniel Kahneman, Amos Tversky", i:"Hebrew University of Jerusalem", c:"🇮🇱 Israel", w:"Human judgement runs on predictable mental shortcuts — and predictable errors.", b:["psy_festinger"]},
+
+/* ===================== MATHEMATICS ===================== */
+{id:"math_euclid", d:"Mathematics", y:-300, t:"The Elements (axiomatic geometry)", p:"Euclid", i:"Alexandria", c:"🇪🇬 Hellenistic Egypt", w:"Built all of geometry from a handful of axioms — the model of proof for 2,000 years."},
+{id:"math_khwarizmi", d:"Mathematics", y:820, t:"Algebra (al-jabr)", p:"Al-Khwārizmī", i:"House of Wisdom, Baghdad", c:"🇮🇶 Abbasid Iraq", w:"Systematic equation-solving; his name gives us \"algorithm\"."},
+{id:"math_calculus", d:"Mathematics", y:1684, t:"The calculus", p:"Newton & Leibniz (independently)", i:"Cambridge / Hanover", c:"🇬🇧🇩🇪 UK/Germany", w:"A mathematics of change and the infinitely small — the language of physics.", b:["math_euclid"]},
+{id:"math_gauss", d:"Mathematics", y:1801, t:"Disquisitiones Arithmeticae", p:"Carl Friedrich Gauss", i:"University of Göttingen", c:"🇩🇪 Germany", w:"Reinvented number theory and much else — the \"prince of mathematicians\"."},
+{id:"math_riemann", d:"Mathematics", y:1854, t:"Riemannian geometry", p:"Bernhard Riemann", i:"University of Göttingen", c:"🇩🇪 Germany", w:"Curved, higher-dimensional space — the geometry Einstein would later need.", b:["math_gauss"]},
+{id:"math_cantor", d:"Mathematics", y:1874, t:"Set theory & infinities", p:"Georg Cantor", i:"University of Halle", c:"🇩🇪 Germany", w:"Showed some infinities are bigger than others — refounded mathematics."},
+{id:"math_godel", d:"Mathematics", y:1931, t:"The incompleteness theorems", p:"Kurt Gödel", i:"University of Vienna", c:"🇦🇹 Austria", w:"Any rich consistent system has true statements it can't prove — a limit on maths itself.", b:["math_cantor"]},
+{id:"math_turing", d:"Mathematics", y:1936, t:"Computability & the Turing machine", p:"Alan Turing", i:"University of Cambridge / Princeton", c:"🇬🇧 UK", w:"Defined what it means to compute — the theoretical birth of the computer.", b:["math_godel"]},
+{id:"math_shannon", d:"Mathematics", y:1948, t:"A Mathematical Theory of Communication", p:"Claude Shannon", i:"Bell Labs", c:"🇺🇸 USA", w:"Defined information in bits — the foundation of the digital age.", b:["math_turing"]},
+{id:"math_wiles", d:"Mathematics", y:1995, t:"Proof of Fermat's Last Theorem", p:"Andrew Wiles", i:"Princeton University", c:"🇬🇧🇺🇸 UK/USA", w:"Cracked a 358-year-old problem, connecting elliptic curves and modular forms."},
+{id:"math_perelman", d:"Mathematics", y:2003, t:"Proof of the Poincaré conjecture", p:"Grigori Perelman", i:"Steklov Institute, St Petersburg", c:"🇷🇺 Russia", w:"Solved a million-dollar Millennium Problem — then declined the prize.", link:"https://arxiv.org/abs/math/0211159"},
+
+/* ===================== METANOMICS (systems & economics) ===================== */
+{id:"econ_smith", d:"Metanomics", y:1776, t:"The Wealth of Nations", p:"Adam Smith", i:"University of Glasgow", c:"🏴 Scotland", w:"Markets coordinate self-interest into order — founded economics."},
+{id:"econ_ricardo", d:"Metanomics", y:1817, t:"Comparative advantage", p:"David Ricardo", i:"independent, London", c:"🇬🇧 UK", w:"Even the weaker producer gains from trade — the case for specialisation."},
+{id:"econ_walras", d:"Metanomics", y:1874, t:"General equilibrium theory", p:"Léon Walras", i:"University of Lausanne", c:"🇫🇷🇨🇭 France/Switzerland", w:"Modelled a whole economy of interacting markets mathematically."},
+{id:"econ_keynes", d:"Metanomics", y:1936, t:"The General Theory", p:"John Maynard Keynes", i:"University of Cambridge", c:"🇬🇧 UK", w:"Demand drives output and employment — reshaped macroeconomics and policy."},
+{id:"econ_vnm", d:"Metanomics", y:1944, t:"Game theory", p:"John von Neumann, Oskar Morgenstern", i:"Institute for Advanced Study, Princeton", c:"🇺🇸 USA", w:"A mathematics of strategic interaction between rational agents."},
+{id:"econ_wiener", d:"Metanomics", y:1948, t:"Cybernetics", p:"Norbert Wiener", i:"MIT", c:"🇺🇸 USA", w:"Control and feedback as a common language for machines, bodies and societies.", b:["math_shannon"]},
+{id:"econ_nash", d:"Metanomics", y:1950, t:"The Nash equilibrium", p:"John Nash", i:"Princeton University", c:"🇺🇸 USA", w:"A stable outcome where no player can gain by changing alone — game theory's keystone.", b:["econ_vnm"]},
+{id:"econ_arrow", d:"Metanomics", y:1951, t:"The impossibility theorem", p:"Kenneth Arrow", i:"Stanford / Cowles Commission", c:"🇺🇸 USA", w:"No voting rule can fairly turn individual preferences into a group ranking.", b:["econ_nash"]},
+{id:"econ_blackscholes", d:"Metanomics", y:1973, t:"Options pricing (Black–Scholes)", p:"Black, Scholes; Merton", i:"MIT / University of Chicago", c:"🇺🇸 USA", w:"A formula to price risk — built the modern derivatives industry."},
+{id:"econ_network", d:"Metanomics", y:1999, t:"Scale-free networks", p:"Albert-László Barabási, Réka Albert", i:"University of Notre Dame", c:"🇺🇸🇭🇺 USA/Hungary", w:"Many real networks have hubs — a new science of complex systems.", link:"https://arxiv.org/abs/cond-mat/9910332", b:["soc_smallworld"]},
+{id:"econ_rct", d:"Metanomics", y:2003, t:"Randomised trials in development economics", p:"Banerjee, Duflo, Kremer", i:"MIT / Harvard (J-PAL)", c:"🇮🇳🇫🇷🇺🇸 intl.", w:"Tested anti-poverty policies like medicine — evidence over ideology. (Nobel 2019)"},
+
+/* ===================== LANGUAGES ===================== */
+{id:"lang_panini", d:"Languages", y:-400, t:"Aṣṭādhyāyī — a formal grammar of Sanskrit", p:"Pāṇini", i:"ancient Gandhāra", c:"🇮🇳 India", w:"~4,000 rules generating a language — arguably the first formal system, 2,300 years before computing."},
+{id:"lang_champollion", d:"Languages", y:1822, t:"Deciphering hieroglyphs", p:"Jean-François Champollion", i:"Collège de France", c:"🇫🇷 France", w:"The Rosetta Stone cracked open 3,000 years of Egyptian writing."},
+{id:"lang_grimm", d:"Languages", y:1822, t:"Grimm's Law of sound change", p:"Jacob Grimm", i:"University of Göttingen", c:"🇩🇪 Germany", w:"Showed languages change by regular rules — birth of comparative linguistics."},
+{id:"lang_saussure", d:"Languages", y:1916, t:"Structural linguistics", p:"Ferdinand de Saussure", i:"University of Geneva", c:"🇨🇭 Switzerland", w:"Language as a system of signs and differences — reshaped the humanities."},
+{id:"lang_chomsky", d:"Languages", y:1957, t:"Generative grammar (Syntactic Structures)", p:"Noam Chomsky", i:"MIT", c:"🇺🇸 USA", w:"A finite set of rules generates infinite sentences — language as computation.", b:["lang_panini"]},
+{id:"lang_word2vec", d:"Languages", y:2013, t:"Word embeddings (word2vec)", p:"Tomáš Mikolov et al.", i:"Google", c:"🇨🇿🇺🇸 Czech/USA", w:"Turned words into vectors of meaning — machines began to model language at scale.", link:"https://arxiv.org/abs/1301.3781", b:["lang_chomsky","math_shannon"]},
+{id:"cs_transformer", d:"Languages", y:2017, t:"The Transformer architecture", p:"Vaswani et al.", i:"Google Brain / Google Research", c:"🇺🇸 USA", w:"\"Attention is all you need\" — the architecture behind ChatGPT and modern AI.", link:"https://arxiv.org/abs/1706.03762", b:["lang_word2vec","cs_alexnet"]},
+{id:"cs_gpt3", d:"Languages", y:2020, t:"Large language models (GPT-3)", p:"OpenAI (Brown et al.)", i:"OpenAI", c:"🇺🇸 USA", w:"Showed that scale alone gives language models broad, few-shot ability.", link:"https://arxiv.org/abs/2005.14165", b:["cs_transformer"]},
+
+/* ===================== HISTORY (as a discipline) ===================== */
+{id:"hist_herodotus", d:"History", y:-430, t:"The Histories", p:"Herodotus", i:"Halicarnassus / Athens", c:"🇬🇷 Greece", w:"\"The Father of History\" — first to gather and weigh evidence about the past."},
+{id:"hist_thucydides", d:"History", y:-400, t:"History of the Peloponnesian War", p:"Thucydides", i:"Athens", c:"🇬🇷 Greece", w:"Sought human, political causes rather than the gods — analytical history."},
+{id:"hist_sima", d:"History", y:-94, t:"Records of the Grand Historian (Shiji)", p:"Sima Qian", i:"Han imperial court", c:"🇨🇳 China", w:"Set the model for East Asian historiography for two millennia."},
+{id:"hist_ibnkhaldun", d:"History", y:1377, t:"The Muqaddimah", p:"Ibn Khaldun", i:"Tunis / Fez", c:"🇹🇳 Tunisia", w:"Treated the rise and fall of states scientifically — proto-sociology and economics.", b:["hist_thucydides"]},
+{id:"hist_ranke", d:"History", y:1824, t:"Scientific, source-based history", p:"Leopold von Ranke", i:"University of Berlin", c:"🇩🇪 Germany", w:"History \"as it actually happened\", grounded in primary documents — modern method."},
+{id:"hist_annales", d:"History", y:1949, t:"The Annales school (longue durée)", p:"Fernand Braudel", i:"Collège de France", c:"🇫🇷 France", w:"Shifted focus from kings to geography, economy and slow structures.", b:["hist_ranke"]},
+{id:"hist_cliodynamics", d:"History", y:2003, t:"Cliodynamics", p:"Peter Turchin", i:"University of Connecticut", c:"🇷🇺🇺🇸 Russia/USA", w:"Models historical cycles with data and equations — quantitative history.", b:["hist_annales","soc_network_intro"]},
+
+/* ===================== SOCIOLOGY (brief — full story in dedicated tab) ===================== */
+{id:"soc_comte", d:"Sociology", y:1838, t:"Coining \"sociology\" (social physics)", p:"Auguste Comte", i:"Paris", c:"🇫🇷 France", w:"Named the science of society and dreamed of laws as firm as physics.", b:["hist_ibnkhaldun"]},
+{id:"soc_marx", d:"Sociology", y:1867, t:"Das Kapital", p:"Karl Marx", i:"independent, London", c:"🇩🇪 Germany", w:"Class and economics as the engine of history — vast influence and dispute."},
+{id:"soc_durkheim", d:"Sociology", y:1897, t:"Suicide & social facts", p:"Émile Durkheim", i:"University of Bordeaux", c:"🇫🇷 France", w:"Used statistics to show even suicide has social causes — made sociology empirical.", b:["soc_comte"]},
+{id:"soc_weber", d:"Sociology", y:1905, t:"The Protestant Ethic", p:"Max Weber", i:"University of Heidelberg", c:"🇩🇪 Germany", w:"Ideas and culture, not just economics, shape how societies develop."},
+{id:"soc_frankfurt", d:"Sociology", y:1944, t:"Critical theory", p:"Horkheimer & Adorno", i:"Institute for Social Research, Frankfurt", c:"🇩🇪 Germany", w:"Turned social science into a critique of mass culture and domination."},
+{id:"soc_smallworld", d:"Sociology", y:1998, t:"Small-world networks", p:"Duncan Watts, Steven Strogatz", i:"Cornell University", c:"🇺🇸🇦🇺 USA/Australia", w:"Why we're all six handshakes apart — maths meets society.", b:["soc_durkheim"]},
+{id:"soc_network_intro", d:"Sociology", y:2002, t:"Computational social science", p:"network-science movement", i:"multiple (Cornell, Notre Dame, Michigan)", c:"🌍 international", w:"Big data + networks let society be measured at population scale.", b:["soc_smallworld","econ_network"]},
+
+/* ===================== ART ===================== */
+{id:"art_lascaux", d:"Art", y:-17000, t:"Cave painting (Lascaux)", p:"Upper-Palaeolithic artists", i:"—", c:"🇫🇷 France", w:"Among the oldest known image-making — symbolic thought made visible."},
+{id:"art_giotto", d:"Art", y:1305, t:"Naturalism & depth (Scrovegni Chapel)", p:"Giotto di Bondone", i:"Padua", c:"🇮🇹 Italy", w:"Gave figures weight and emotion — the seed of Renaissance painting."},
+{id:"art_perspective", d:"Art", y:1415, t:"Linear perspective", p:"Filippo Brunelleschi; Alberti", i:"Florence", c:"🇮🇹 Italy", w:"A geometric system for depth on a flat surface — art borrows from mathematics.", b:["math_euclid"]},
+{id:"art_davinci", d:"Art", y:1503, t:"The Mona Lisa & sfumato", p:"Leonardo da Vinci", i:"Florence", c:"🇮🇹 Italy", w:"Fused anatomy, optics and art — the archetype of the polymath."},
+{id:"art_impressionism", d:"Art", y:1874, t:"Impressionism", p:"Monet, Renoir, Degas et al.", i:"independent, Paris", c:"🇫🇷 France", w:"Painted light and perception over precise outline — broke with the academy."},
+{id:"art_cubism", d:"Art", y:1907, t:"Cubism", p:"Pablo Picasso, Georges Braque", i:"independent, Paris", c:"🇪🇸🇫🇷 Spain/France", w:"Showed objects from many angles at once — shattered single-viewpoint realism.", b:["art_impressionism"]},
+{id:"art_duchamp", d:"Art", y:1917, t:"The readymade (Fountain)", p:"Marcel Duchamp", i:"independent, New York", c:"🇫🇷🇺🇸 France/USA", w:"Declared that the idea, not the craft, can be the art — conceptual art begins."},
+{id:"art_diffusion", d:"Art", y:2022, t:"Generative-AI image models", p:"latent-diffusion researchers (Stable Diffusion, DALL·E)", i:"LMU Munich / Stability / OpenAI", c:"🇩🇪🇺🇸 Germany/USA", w:"Text turns into images — a new, contested medium of visual creation.", b:["cs_transformer"]},
+
+/* ===================== MUSIC ===================== */
+{id:"mus_pythagoras", d:"Music", y:-530, t:"Harmony as ratio", p:"Pythagoras (school)", i:"Croton", c:"🇬🇷 Greece", w:"Found that consonant intervals are simple whole-number ratios — music as number."},
+{id:"mus_guido", d:"Music", y:1025, t:"Staff notation & solfège", p:"Guido of Arezzo", i:"Arezzo", c:"🇮🇹 Italy", w:"Invented a way to write pitch down — music could be preserved and shared."},
+{id:"mus_bach", d:"Music", y:1722, t:"The Well-Tempered Clavier", p:"Johann Sebastian Bach", i:"Köthen / Leipzig", c:"🇩🇪 Germany", w:"Showcased equal-ish temperament and the full logic of Western harmony."},
+{id:"mus_helmholtz", d:"Music", y:1863, t:"On the Sensations of Tone", p:"Hermann von Helmholtz", i:"University of Heidelberg", c:"🇩🇪 Germany", w:"Explained the physics and physiology of how we hear music.", b:["mus_pythagoras"]},
+{id:"mus_edison", d:"Music", y:1877, t:"Sound recording (phonograph)", p:"Thomas Edison", i:"Menlo Park", c:"🇺🇸 USA", w:"Captured sound for the first time — music became a recorded object."},
+{id:"mus_moog", d:"Music", y:1964, t:"The voltage-controlled synthesizer", p:"Robert Moog", i:"independent, New York", c:"🇺🇸 USA", w:"Made electronic sound playable — transformed popular music.", b:["phy_transistor"]},
+{id:"mus_midi", d:"Music", y:1983, t:"MIDI standard", p:"Dave Smith, Ikutaro Kakehashi", i:"Sequential / Roland", c:"🇺🇸🇯🇵 USA/Japan", w:"A common language let instruments and computers talk — the basis of digital music.", b:["mus_moog"]},
+
+/* ===================== RHETORIC ===================== */
+{id:"rhet_aristotle", d:"Rhetoric", y:-350, t:"Rhetoric (ethos, pathos, logos)", p:"Aristotle", i:"the Lyceum, Athens", c:"🇬🇷 Greece", w:"Systematised persuasion into the three appeals still taught today."},
+{id:"rhet_cicero", d:"Rhetoric", y:-55, t:"De Oratore", p:"Cicero", i:"Roman Republic", c:"🇮🇹 Rome", w:"Married eloquence with broad learning — the ideal orator-statesman.", b:["rhet_aristotle"]},
+{id:"rhet_quintilian", d:"Rhetoric", y:95, t:"Institutio Oratoria", p:"Quintilian", i:"Imperial Rome", c:"🇮🇹 Rome", w:"A complete education in rhetoric — shaped European schooling for centuries."},
+{id:"rhet_perelman", d:"Rhetoric", y:1958, t:"The New Rhetoric", p:"Chaïm Perelman, L. Olbrechts-Tyteca", i:"Université libre de Bruxelles", c:"🇧🇪 Belgium", w:"Revived argumentation theory for the modern age — persuasion as reasoning.", b:["rhet_aristotle"]},
+{id:"rhet_toulmin", d:"Rhetoric", y:1958, t:"The Toulmin model of argument", p:"Stephen Toulmin", i:"University of Leeds", c:"🇬🇧 UK", w:"Broke arguments into claim, grounds, warrant — used in law, AI and debate."},
+{id:"rhet_lakoff", d:"Rhetoric", y:1980, t:"Metaphors We Live By (framing)", p:"George Lakoff, Mark Johnson", i:"UC Berkeley", c:"🇺🇸 USA", w:"Showed thought and persuasion run on metaphor and framing.", b:["lang_chomsky"]},
+
+/* ===================== DANCE ===================== */
+{id:"dance_natya", d:"Dance", y:200, t:"The Nāṭya Śāstra", p:"attributed to Bharata Muni", i:"ancient India", c:"🇮🇳 India", w:"A complete treatise codifying dance, drama and gesture — among the oldest performance theory."},
+{id:"dance_ballet", d:"Dance", y:1661, t:"Codified ballet & the five positions", p:"Pierre Beauchamp (Académie Royale)", i:"Académie Royale de Danse", c:"🇫🇷 France", w:"Louis XIV's academy turned court dance into a formal technical system."},
+{id:"dance_graham", d:"Dance", y:1926, t:"Modern dance (the Graham technique)", p:"Martha Graham", i:"independent, New York", c:"🇺🇸 USA", w:"Broke from ballet to express inner emotion through contraction and release."},
+{id:"dance_laban", d:"Dance", y:1928, t:"Labanotation", p:"Rudolf Laban", i:"Choreographic Institute, Berlin", c:"🇭🇺🇩🇪 Hungary/Germany", w:"A written system for recording movement — \"sheet music\" for dance.", b:["mus_guido"]},
+{id:"dance_cunningham", d:"Dance", y:1953, t:"Chance choreography", p:"Merce Cunningham (with John Cage)", i:"independent, New York", c:"🇺🇸 USA", w:"Used randomness to separate dance from music and narrative — radically modern."},
+{id:"dance_mocap", d:"Dance", y:2000, t:"Motion capture & dance science", p:"computer-graphics & biomechanics labs", i:"multiple", c:"🌍 international", w:"Digitised the moving body — links dance to film, games and biomechanics."}
+];
+
+/* ============================================================
+   SOCIOLOGY TAB CONTENT (dedicated)
+   ============================================================ */
+const SOCIO = [
+ {era:"I. Origins — society as an object of study"},
+ {y:"1377", t:"Ibn Khaldun — the Muqaddimah", who:"Tunis / Fez · 🇹🇳", txt:"Centuries before the word existed, Ibn Khaldun treated the rise and fall of dynasties as a subject with its own laws. His concept of <i>ʿaṣabiyyah</i> (social cohesion / group feeling) explained how tribes gain power, soften in cities, and are overthrown by hungrier outsiders.", built:"The true starting point — he applied causal, empirical reasoning to society long before Europe did.", q:"Ibn Khaldun Muqaddimah Rosenthal translation"},
+ {y:"1725", t:"Giambattista Vico — The New Science", who:"Naples · 🇮🇹", txt:"Vico argued that human society, unlike nature, is something we ourselves make — so we can truly know it. He proposed recurring cycles (<i>corsi e ricorsi</i>) through which civilisations pass.", built:"Broke from Ibn Khaldun's tribal focus to a philosophy of history; planted the idea of social stages.", q:"Vico New Science Scienza Nuova"},
+ {era:"II. The founders — naming and building the discipline"},
+ {y:"1838", t:"Auguste Comte — coining \"sociology\"", who:"Paris · 🇫🇷", txt:"Comte first called it <i>social physics</i>, then \"sociology\" when a statistician took the first name. He placed it atop a hierarchy of sciences and believed society would yield laws as firm as Newton's.", built:"Gave the field its name and its founding (over-)ambition: that society could be a hard science.", q:"Auguste Comte positive philosophy sociology"},
+ {y:"1835", t:"Adolphe Quetelet — the \"average man\"", who:"Brussels · 🇧🇪", txt:"Quetelet actually used the term \"social physics\" and applied the bell curve to human traits and crime rates, arguing social phenomena are statistically regular.", built:"Supplied the quantitative, statistical tools Comte only imagined — a direct ancestor of today's data-driven social science.", q:"Quetelet social physics average man statistics"},
+ {y:"1867", t:"Karl Marx — Das Kapital", who:"London (émigré) · 🇩🇪", txt:"Marx made class conflict and the mode of production the engine of historical change — \"historical materialism\". Whatever one makes of the politics, his structural analysis of capitalism reshaped every social science.", built:"Broke from Comte's harmony-seeking positivism: society is driven by conflict, not consensus.", q:"Marx Capital volume 1 Das Kapital"},
+ {y:"1897", t:"Émile Durkheim — Suicide & social facts", who:"Bordeaux · 🇫🇷", txt:"By showing suicide rates vary lawfully with social integration, Durkheim proved that \"social facts\" exist outside the individual and can be studied empirically. He secured sociology its first university chair.", built:"Took Comte's dream and Quetelet's statistics and delivered the first rigorous empirical sociology.", q:"Durkheim Suicide study social facts"},
+ {y:"1905", t:"Max Weber — The Protestant Ethic", who:"Heidelberg · 🇩🇪", txt:"Weber argued culture and ideas — not only economics — shape society, tracing capitalism partly to Calvinist values. He introduced <i>verstehen</i> (interpretive understanding) and the analysis of bureaucracy and authority.", built:"A direct counter to Marx: meaning and belief matter as much as material conditions.", q:"Max Weber Protestant Ethic Spirit of Capitalism"},
+ {era:"III. The 20th century — schools and critique"},
+ {y:"1925", t:"The Chicago School — urban ethnography", who:"University of Chicago · 🇺🇸", txt:"Park and Burgess treated the city as a social laboratory, sending researchers into neighbourhoods, gangs and slums. Sociology went into the field.", built:"Added Weber's interpretive, on-the-ground method to Durkheim's statistics.", q:"Chicago School sociology Park Burgess city"},
+ {y:"1944", t:"The Frankfurt School — critical theory", who:"Frankfurt / exile · 🇩🇪", txt:"Horkheimer and Adorno's <i>Dialectic of Enlightenment</i> turned social science into a critique of mass culture, instrumental reason and domination.", built:"Fused Marx and Weber into a self-critical stance — social science that interrogates power, including its own.", q:"Horkheimer Adorno Dialectic of Enlightenment"},
+ {y:"1959", t:"Erving Goffman — the self as performance", who:"USA / Canada · 🇨🇦", txt:"<i>The Presentation of Self in Everyday Life</i> analysed social interaction as theatre — front stage, back stage, impression management.", built:"Zoomed from grand structures down to the micro-scale of face-to-face life.", q:"Goffman Presentation of Self Everyday Life"},
+ {y:"1979", t:"Pierre Bourdieu — habitus & capital", who:"Collège de France · 🇫🇷", txt:"<i>Distinction</i> showed how taste and culture reproduce class. His concepts — habitus, cultural capital, field — became standard social-science vocabulary.", built:"Bridged the structure-vs-agency divide that split Marx (structure) and Goffman (agency).", q:"Bourdieu Distinction habitus cultural capital"},
+ {era:"IV. The quantitative & behavioural turn"},
+ {y:"1974", t:"Kahneman & Tversky — heuristics and biases", who:"Hebrew University · 🇮🇱", txt:"By demonstrating systematic errors in human judgement, they founded behavioural economics and won a Nobel — overturning the \"rational actor\" that classical economics assumed.", built:"Replaced the idealised rational human (Smith, Walras) with an empirically tested, biased one.", q:"Kahneman Tversky judgment under uncertainty heuristics biases"},
+ {y:"1998", t:"Watts & Strogatz, then Barabási — network science", who:"Cornell / Notre Dame · 🇺🇸", txt:"\"Small-world\" and \"scale-free\" network models gave society a mathematical structure: most of us are a few links apart, and a handful of hubs dominate.", built:"Realised Comte's old dream of laws — but for the <i>connections</i> between people, not people themselves.", q:"Watts Strogatz small world networks 1998"},
+ {y:"2003", t:"Banerjee, Duflo & Kremer — the RCT movement", who:"MIT / Harvard (J-PAL) · 🌍", txt:"They tested anti-poverty policies with randomised controlled trials — the method of medicine — bringing causal rigour to development economics. Nobel 2019.", built:"Answered Durkheim's empiricism and Kahneman's realism with experimental proof of what actually works.", q:"Banerjee Duflo Kremer randomized controlled trials development economics"},
+ {y:"2003", t:"Peter Turchin — cliodynamics", who:"University of Connecticut · 🇷🇺🇺🇸", txt:"Turchin applies dynamical-systems maths and large historical databases to model the cycles of political stability and collapse — \"history as science\".", built:"Closes the loop back to Ibn Khaldun and Vico: cyclical history, now with data and equations.", q:"Peter Turchin cliodynamics secular cycles"}
+];
+
+/* ============================================================
+   SCALE — piecewise so the modern era gets room
+   ============================================================ */
+const SCALE = [
+ [-17000,0],[-3000,80],[-500,200],[0,290],[500,370],[1000,450],
+ [1300,545],[1500,675],[1600,800],[1700,940],[1800,1160],[1850,1320],
+ [1900,1560],[1925,1820],[1950,2150],[1970,2560],[1980,2980],[1990,3560],
+ [2000,4300],[2010,5120],[2020,5960],[2026,6320]
+];
+const PAD_L = 210, PAD_R = 80;
+function xScale(year){
+  if(year<=SCALE[0][0]) return SCALE[0][1]+PAD_L;
+  for(let i=0;i<SCALE.length-1;i++){
+    const [y0,x0]=SCALE[i],[y1,x1]=SCALE[i+1];
+    if(year<=y1){ return PAD_L + x0 + (x1-x0)*((year-y0)/(y1-y0)); }
+  }
+  return SCALE[SCALE.length-1][1]+PAD_L;
+}
+const SCENE_W = xScale(2026)+PAD_R;
+
+/* ============================================================
+   STATE + helpers
+   ============================================================ */
+const byId = {}; M.forEach(m=>byId[m.id]=m);
+const branchOf = {};
+BRANCHES.forEach(b=>b.disciplines.forEach(d=>branchOf[d]=b));
+let showConn=true, collapsed={}, searchTerm="";
+const els={};
+
+const CARD_W=158, CARD_H=64, V_GAP=8, GAP_X=8;
+
+function fmtYear(y){ return y<0 ? Math.abs(y)+" BCE" : (y<1000? y+" CE": ""+y); }
+function enc(s){ return encodeURIComponent(s); }
+function searchLinks(m){
+  const q = (m.searchq) || (m.t.replace(/[^\w\s]/g,'')+" "+(m.p||"").split(/[,;(]/)[0]);
+  return [
+   ["OpenAlex","https://openalex.org/works?page=1&filter=default.search:"+enc(q)],
+   ["Semantic Scholar","https://www.semanticscholar.org/search?q="+enc(q)+"&sort=relevance"],
+   ["CORE (free full text)","https://core.ac.uk/search?q="+enc(q)],
+   ["Google Scholar","https://scholar.google.com/scholar?q="+enc(q)]
+  ];
+}
+
+/* ============================================================
+   RENDER TIMELINE
+   ============================================================ */
+function layout(){
+  const scene=els.scene, branchesEl=els.branches;
+  branchesEl.innerHTML="";
+  els.scene.style.width=SCENE_W+"px";
+
+  // axis ticks + gridlines
+  const axisTicks=[-17000,-3000,-500,1,500,1000,1300,1500,1600,1700,1800,1850,1900,1925,1950,1970,1990,2000,2010,2020];
+  els.axis.innerHTML=""; els.grid.innerHTML="";
+  axisTicks.forEach(y=>{
+    const x=xScale(y);
+    const t=document.createElement("div"); t.className="tick"; t.style.left=x+"px";
+    t.innerHTML="<span>"+(y===1?"1 CE":fmtYear(y))+"</span>"; els.axis.appendChild(t);
+    const g=document.createElement("div"); g.className="g"; g.style.left=x+"px"; els.grid.appendChild(g);
+  });
+
+  const fromY=parseFloat(els.from.value)|| -99999, toY=parseFloat(els.to.value)||99999;
+
+  BRANCHES.forEach(br=>{
+    const bWrap=document.createElement("div");
+    bWrap.className="branch"+(collapsed[br.key]?" collapsed":"");
+    const head=document.createElement("div"); head.className="branch-head";
+    head.innerHTML=
+      '<div class="bar" style="background:'+br.color+'"></div>'+
+      '<h2 style="color:'+br.color+'">'+br.name+'</h2>'+
+      '<span class="tag" style="background:'+br.color+'">'+br.sub+'</span>'+
+      '<span class="collapse btn">'+(collapsed[br.key]?"▸ expand":"▾ collapse")+'</span>';
+    head.querySelector(".collapse").onclick=()=>{collapsed[br.key]=!collapsed[br.key];render();};
+    bWrap.appendChild(head);
+
+    const body=document.createElement("div"); body.className="branch-body";
+    br.disciplines.forEach(dname=>{
+      const track=document.createElement("div"); track.className="track";
+      const def=DISC[dname];
+      // label
+      const lab=document.createElement("div"); lab.className="label";
+      const li=document.createElement("div"); li.className="label-inner";
+      li.style.borderLeftColor=br.color;
+      li.innerHTML='<b style="color:'+br.color+'">'+dname+'</b><small>'+def.def+'</small>';
+      const latest=document.createElement("a"); latest.className="latest"; latest.textContent="Latest research ↗";
+      latest.href=def.latest[1]; latest.target="_blank"; latest.rel="noopener";
+      latest.title="Opens a live feed: "+def.latest[0];
+      li.appendChild(latest); lab.appendChild(li); track.appendChild(lab);
+
+      const lane=document.createElement("div"); lane.className="lane";
+      // milestones in this discipline, filtered by date
+      let items=M.filter(m=>m.d===dname && m.y>=fromY && m.y<=toY).sort((a,b)=>a.y-b.y);
+      const laneRight=[]; let maxLane=0;
+      items.forEach(m=>{
+        const x=xScale(m.y);
+        let placed=-1;
+        for(let l=0;l<laneRight.length;l++){ if(x>=laneRight[l]+GAP_X){placed=l;break;} }
+        if(placed<0){ placed=laneRight.length; laneRight.push(0); }
+        laneRight[placed]=x+CARD_W;
+        maxLane=Math.max(maxLane,placed);
+        const top=placed*(CARD_H+V_GAP)+8;
+        const card=document.createElement("div");
+        card.className="card"; card.style.left=x+"px"; card.style.top=top+"px";
+        card.style.borderTopColor=br.color;
+        card.dataset.id=m.id;
+        const flag=(m.c||"").split(" ")[0];
+        card.innerHTML='<div class="yr" style="color:'+br.color+'">'+fmtYear(m.y)+'</div>'+
+          '<div class="ti">'+m.t+'</div>'+
+          '<div class="meta"><span class="flag">'+flag+'</span><span>'+(m.p||"").split(/[,;(]/)[0]+'</span></div>';
+        card.onclick=()=>openModal(m.id);
+        card.onmouseenter=()=>hotEdges(m.id,true);
+        card.onmouseleave=()=>hotEdges(m.id,false);
+        m._el=card;
+        lane.appendChild(card);
+      });
+      lane.style.height=((maxLane+1)*(CARD_H+V_GAP)+16)+"px";
+      if(items.length===0) lane.style.height="58px";
+      track.appendChild(lane);
+      body.appendChild(track);
+    });
+    bWrap.appendChild(body);
+    branchesEl.appendChild(bWrap);
+  });
+
+  applySearchDim();
+  requestAnimationFrame(drawConnectors);
+}
+
+function applySearchDim(){
+  const term=searchTerm.trim().toLowerCase();
+  M.forEach(m=>{
+    if(!m._el) return;
+    if(!term){ m._el.classList.remove("dim"); return; }
+    const hay=(m.t+" "+m.p+" "+m.i+" "+m.c+" "+m.w+" "+m.y+" "+m.d).toLowerCase();
+    m._el.classList.toggle("dim", !hay.includes(term));
+  });
+}
+
+/* connectors */
+function drawConnectors(){
+  const svg=els.conn; svg.innerHTML="";
+  svg.setAttribute("width",SCENE_W);
+  const sceneRect=els.scene.getBoundingClientRect();
+  svg.setAttribute("height",els.branches.offsetHeight+els.axis.offsetHeight+els.grid.offsetHeight);
+  svg.style.height=(els.scene.offsetHeight)+"px";
+  if(!showConn){ return; }
+  // defs arrow per branch colour
+  const ns="http://www.w3.org/2000/svg";
+  const defs=document.createElementNS(ns,"defs");
+  BRANCHES.forEach(br=>{
+    const mk=document.createElementNS(ns,"marker");
+    mk.setAttribute("id","arr_"+br.key); mk.setAttribute("viewBox","0 0 10 10");
+    mk.setAttribute("refX","9"); mk.setAttribute("refY","5"); mk.setAttribute("markerWidth","7");
+    mk.setAttribute("markerHeight","7"); mk.setAttribute("orient","auto-start-reverse");
+    const pa=document.createElementNS(ns,"path"); pa.setAttribute("d","M0,0 L10,5 L0,10 z");
+    pa.setAttribute("fill",br.raw); mk.appendChild(pa); defs.appendChild(mk);
+  });
+  svg.appendChild(defs);
+
+  function center(el){
+    if(!el) return null;
+    return {x:parseFloat(el.style.left)+CARD_W/2,
+            // need absolute top within scene
+            y: absTop(el)+CARD_H/2,
+            left:parseFloat(el.style.left),
+            top:absTop(el)};
+  }
+  function absTop(el){
+    let t=0, node=el;
+    while(node && node!==els.scene){ t+=node.offsetTop; node=node.offsetParent; }
+    return t;
+  }
+
+  M.forEach(m=>{
+    if(!m.b||!m._el) return;
+    const tgt=center(m._el); if(!tgt) return;
+    m.b.forEach(srcId=>{
+      const src=byId[srcId]; if(!src||!src._el) return;
+      const s=center(src._el); if(!s) return;
+      // from source (older) to target (newer): connect right/left edges, curved
+      const x1=s.left+CARD_W, y1=s.top+CARD_H/2;
+      const x2=tgt.left, y2=tgt.top+CARD_H/2;
+      const dx=Math.max(40,(x2-x1)/2);
+      const path=document.createElementNS(ns,"path");
+      const d="M "+x1+" "+y1+" C "+(x1+dx)+" "+y1+", "+(x2-dx)+" "+y2+", "+x2+" "+y2;
+      path.setAttribute("d",d);
+      const br=branchOf[src.d];
+      path.setAttribute("stroke",br?br.raw:"#888");
+      path.setAttribute("stroke-dasharray","5 4");
+      path.setAttribute("marker-end","url(#arr_"+(br?br.key:"matter")+")");
+      path.dataset.a=srcId; path.dataset.b=m.id;
+      svg.appendChild(path);
+    });
+  });
+}
+function hotEdges(id,on){
+  els.conn.querySelectorAll("path").forEach(p=>{
+    if(p.dataset.a===id||p.dataset.b===id) p.classList.toggle("hot",on);
+  });
+  if(byId[id]&&byId[id]._el) byId[id]._el.classList.toggle("focus",on);
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+function openModal(id){
+  const m=byId[id]; if(!m) return;
+  const br=branchOf[m.d];
+  let html='<div class="kicker" style="color:'+br.color+'">'+br.name+' · '+m.d+'</div>';
+  html+='<h3>'+m.t+'</h3>';
+  html+='<div class="yr">'+fmtYear(m.y)+'</div>';
+  html+='<div class="row"><b>Who</b><span>'+(m.p||"—")+'</span></div>';
+  html+='<div class="row"><b>Institution</b><span>'+(m.i||"—")+'</span></div>';
+  html+='<div class="row"><b>Country</b><span>'+(m.c||"—")+'</span></div>';
+  html+='<div class="why">'+m.w+'</div>';
+  // lineage
+  if(m.b&&m.b.length){
+    html+='<div class="chain"><b>Builds on:</b> '+m.b.map(s=>byId[s]?('<a data-go="'+s+'">'+byId[s].t+' ('+fmtYear(byId[s].y)+')</a>'):s).join(" · ")+'</div>';
+  }
+  const leads=M.filter(x=>x.b&&x.b.includes(id));
+  if(leads.length){
+    html+='<div class="chain"><b>Led to:</b> '+leads.map(s=>'<a data-go="'+s.id+'">'+s.t+' ('+fmtYear(s.y)+')</a>').join(" · ")+'</div>';
+  }
+  // links
+  html+='<div class="links">';
+  if(m.link){
+    let label="Read the paper (free) ↗";
+    if(m.link.includes("arxiv"))label="Read on arXiv (free PDF) ↗";
+    else if(m.link.includes("nature.com"))label="Read on Nature (open access) ↗";
+    else if(m.link.includes("aps.org"))label="Read on APS (free) ↗";
+    else if(m.link.includes("w3.org"))label="Read the original (W3C) ↗";
+    html+='<h4>Primary source</h4><a class="lk primary" target="_blank" rel="noopener" href="'+m.link+'">'+label+'</a>';
+    html+='<h4>Or search the literature</h4>';
+  } else {
+    html+='<h4>Find the free full text</h4>';
+  }
+  searchLinks(m).forEach(([n,u])=>{ html+='<a class="lk" target="_blank" rel="noopener" href="'+u+'">'+n+' ↗</a>'; });
+  html+='<div class="note">'+(m.link?'Direct link checked for a famous-paper match; if it ever moves, the searches above will still find it free.':'No single guaranteed-free PDF for this one, so these open pre-filtered free-literature searches — they always resolve.')+'</div>';
+  html+='</div>';
+  els.modalBody.innerHTML=html;
+  els.modalBody.querySelectorAll("[data-go]").forEach(a=>a.onclick=()=>openModal(a.dataset.go));
+  els.modalBack.classList.add("show");
+  els.modal.style.borderTopColor=br.raw;
+}
+function closeModal(){ els.modalBack.classList.remove("show"); }
+
+/* ============================================================
+   SOCIOLOGY TAB
+   ============================================================ */
+function buildSocio(){
+  const v=els.socio;
+  let h='<div class="socio-intro"><h2>Sociology — the history of the science of us</h2>'+
+    '<p>A standalone trace of how the study of society was built, so you can see what your predecessors made and where the ground is still open. Each thinker is placed against the one before — what they kept, and what they broke. The thread runs from causal history, through the founders who named and grounded the discipline, the 20th-century schools that turned it critical, and finally the quantitative turn that gave society real measurement and experiment.</p></div>';
+  h+='<div class="socio-timeline">';
+  SOCIO.forEach(s=>{
+    if(s.era){ h+='<div class="era">'+s.era+'</div>'; return; }
+    const links=[
+      ["OpenAlex","https://openalex.org/works?page=1&filter=default.search:"+enc(s.q)],
+      ["CORE","https://core.ac.uk/search?q="+enc(s.q)],
+      ["Google Scholar","https://scholar.google.com/scholar?q="+enc(s.q)]
+    ];
+    h+='<div class="scard"><div class="yr">'+s.y+'</div><h3>'+s.t+'</h3>'+
+       '<div class="who">'+s.who+'</div>'+
+       '<p>'+s.txt+'</p>'+
+       '<div class="built">↳ '+s.built+'</div>'+
+       '<div class="links">'+links.map(([n,u])=>'<a class="lk" target="_blank" rel="noopener" href="'+u+'">'+n+' ↗</a>').join("")+'</div>'+
+       '</div>';
+  });
+  h+='</div>';
+  v.innerHTML=h;
+}
+
+/* ============================================================
+   WIRING
+   ============================================================ */
+function render(){ layout(); }
+
+function init(){
+  els.scene=document.getElementById("scene");
+  els.branches=document.getElementById("branches");
+  els.axis=document.getElementById("axis");
+  els.grid=document.getElementById("grid");
+  els.conn=document.getElementById("connectors");
+  els.from=document.getElementById("from");
+  els.to=document.getElementById("to");
+  els.modalBack=document.getElementById("modalBack");
+  els.modal=document.getElementById("modal");
+  els.modalBody=document.getElementById("modalBody");
+  els.socio=document.getElementById("socio-view");
+  document.getElementById("builtdate").textContent="built "+new Date().toISOString().slice(0,10);
+
+  // tabs
+  document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    t.classList.add("active");
+    const v=t.dataset.view;
+    document.getElementById("timeline-view").style.display = v==="timeline"?"block":"none";
+    document.getElementById("tlHint").style.display = v==="timeline"?"block":"none";
+    els.socio.classList.toggle("show", v==="socio");
+    if(v==="timeline") requestAnimationFrame(drawConnectors);
+  });
+
+  // search
+  document.getElementById("search").addEventListener("input",e=>{ searchTerm=e.target.value; applySearchDim(); });
+  // date range
+  [els.from,els.to].forEach(inp=>inp.addEventListener("change",render));
+  // connectors toggle
+  document.getElementById("toggleConn").onclick=function(){
+    showConn=!showConn; this.classList.toggle("on",showConn);
+    this.textContent="Connectors: "+(showConn?"on":"off"); drawConnectors();
+  };
+  // reset
+  document.getElementById("resetBtn").onclick=()=>{
+    els.from.value=-3000; els.to.value=2026; searchTerm=""; document.getElementById("search").value="";
+    collapsed={}; render();
+  };
+  // modal close
+  document.getElementById("modalX").onclick=closeModal;
+  els.modalBack.onclick=e=>{ if(e.target===els.modalBack) closeModal(); };
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeModal(); });
+  // redraw connectors on scroll/resize
+  document.getElementById("scroll").addEventListener("scroll",()=>requestAnimationFrame(drawConnectors));
+  window.addEventListener("resize",()=>requestAnimationFrame(drawConnectors));
+
+  buildSocio();
+  render();
+}
+document.addEventListener("DOMContentLoaded",init);
+</script>
+<script>
+if('serviceWorker' in navigator && location.protocol==='https:'){
+  window.addEventListener('load',function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+}
+</script>
+</body>
+</html>
