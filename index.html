@@ -150,7 +150,7 @@ header.top{flex:0 0 auto;z-index:60;background:linear-gradient(180deg,rgba(247,2
 .socio-intro p{color:var(--ink-soft);margin:0}
 .socio-timeline{position:relative;margin-left:14px;border-left:2px solid var(--line2)}
 .scard{position:relative;margin:0 0 26px 32px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 24px;box-shadow:var(--shadow)}
-.scard::before{content:"";position:absolute;left:-41px;top:24px;width:13px;height:13px;border-radius:50%;background:var(--connection);box-shadow:0 0 0 4px var(--navy),0 0 11px var(--connection)}
+.scard::before{content:"";position:absolute;left:-41px;top:24px;width:13px;height:13px;border-radius:50%;background:var(--node,var(--connection));box-shadow:0 0 0 4px var(--navy),0 0 11px var(--node,var(--connection))}
 .scard .yr{font-family:var(--serif);font-weight:700;color:var(--gold);font-size:16px;letter-spacing:.3px}
 .scard h3{font-family:var(--serif);margin:2px 0 3px;font-size:23px;font-weight:700;color:var(--ink)}
 .scard .who{font-size:12.5px;color:var(--ink-soft);margin-bottom:11px}
@@ -159,6 +159,21 @@ header.top{flex:0 0 auto;z-index:60;background:linear-gradient(180deg,rgba(247,2
 .scard .built{font-size:13px;color:var(--connection);font-style:italic;margin:11px 0 4px}
 .scard .links{margin-top:10px}
 .era{font-family:var(--serif);font-size:19px;letter-spacing:.3px;color:var(--gold);margin:12px 0 20px 32px;font-weight:700}
+#inventions-view{display:none;flex:1 1 auto;min-height:0;overflow:auto}
+#inventions-view.show{display:block}
+.inv-status{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:4px 11px;border-radius:999px;margin:2px 0 4px}
+.inv-status.live{background:rgba(47,135,99,.13);color:var(--connection)}
+.inv-status.emerging{background:rgba(169,127,30,.16);color:var(--gold-deep)}
+.inv-status.research{background:rgba(92,100,131,.13);color:var(--ink-soft)}
+.inv-toggle{display:inline-block;margin-top:13px;font-size:12.5px;font-weight:800;border:1px solid var(--line2);background:rgba(40,32,12,.03);border-radius:999px;padding:8px 15px;cursor:pointer;color:var(--ink);font-family:var(--sans);transition:.15s}
+.inv-toggle:hover{background:rgba(169,127,30,.1);border-color:var(--gold)}
+.inv-detail{display:none;margin-top:14px;padding-top:15px;border-top:1px dashed var(--line2)}
+.inv-detail.open{display:block}
+.inv-use{font-size:14px;line-height:1.6;color:var(--ink);margin:0 0 12px;font-weight:600}
+.inv-co{font-size:13.5px;line-height:1.55;color:var(--ink-soft);margin:8px 0}
+.inv-co b{color:var(--ink)}
+.inv-co .lk{display:inline-block;margin-left:6px;text-decoration:none;font-size:12px;border:1px solid var(--line2);border-radius:999px;padding:4px 11px;color:var(--ink);background:rgba(40,32,12,.03);font-weight:700;transition:.15s}
+.inv-co .lk:hover{background:rgba(169,127,30,.1);border-color:var(--gold)}
 
 ::-webkit-scrollbar{height:13px;width:13px}
 ::-webkit-scrollbar-thumb{background:rgba(133,98,20,.3);border-radius:8px;border:3px solid transparent;background-clip:padding-box}
@@ -180,6 +195,7 @@ header.top{flex:0 0 auto;z-index:60;background:linear-gradient(180deg,rgba(247,2
     <div class="tabs">
       <button class="tab active" data-view="timeline">The Timeline</button>
       <button class="tab" data-view="socio">Sociology — the science of us</button>
+      <button class="tab" data-view="inventions">Latest Inventions</button>
     </div>
     <div class="controls">
       <div class="search">
@@ -196,9 +212,9 @@ header.top{flex:0 0 auto;z-index:60;background:linear-gradient(180deg,rgba(247,2
     </div>
   </div>
   <div class="legend">
-    <div class="grp"><span class="swatch" style="background:var(--matter);color:var(--matter)"></span><b style="color:var(--matter)">MATTER</b> · Science</div>
-    <div class="grp"><span class="swatch" style="background:var(--form);color:var(--form)"></span><b style="color:var(--form)">FORM</b> · Metascience</div>
     <div class="grp"><span class="swatch" style="background:var(--connection);color:var(--connection)"></span><b style="color:var(--connection)">CONNECTION</b> · Social science</div>
+    <div class="grp"><span class="swatch" style="background:var(--form);color:var(--form)"></span><b style="color:var(--form)">FORM</b> · Metascience</div>
+    <div class="grp"><span class="swatch" style="background:var(--matter);color:var(--matter)"></span><b style="color:var(--matter)">MATTER</b> · Science</div>
     <div class="conn-key">
       <svg width="40" height="12"><line x1="0" y1="6" x2="32" y2="6" stroke="#a97f1e" stroke-width="2" stroke-dasharray="5 4"/><polygon points="32,1 40,6 32,11" fill="#a97f1e"/></svg>
       builds on → led to
@@ -223,6 +239,7 @@ header.top{flex:0 0 auto;z-index:60;background:linear-gradient(180deg,rgba(247,2
 </section>
 
 <section id="socio-view"></section>
+<section id="inventions-view"></section>
 
 <template id="__bundler_thumbnail">
   <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -264,12 +281,12 @@ header.top{flex:0 0 auto;z-index:60;background:linear-gradient(180deg,rgba(247,2
    DATA
    ============================================================ */
 const BRANCHES = [
-  {key:"matter", name:"MATTER", sub:"Science", color:"var(--matter)", raw:"#e0b04a",
-    disciplines:["Chemistry","Physics","Biology","Engineering","Geology","Astronomy","Architecture"]},
-  {key:"form", name:"FORM", sub:"Metascience", color:"var(--form)", raw:"#e08763",
-    disciplines:["Metaphysics","Neuroscience","Microbiology","Quantum","Psychology","Mathematics","Metanomics"]},
   {key:"connection", name:"CONNECTION", sub:"Social science", color:"var(--connection)", raw:"#5cc196",
-    disciplines:["Languages","History","Sociology","Art","Music","Rhetoric","Dance"]}
+    disciplines:["Art","Dance","History","Languages","Music","Rhetoric","Sociology"]},
+  {key:"form", name:"FORM", sub:"Metascience", color:"var(--form)", raw:"#e08763",
+    disciplines:["Mathematics","Metanomics","Metaphysics","Microbiology","Neuroscience","Psychology","Quantum"]},
+  {key:"matter", name:"MATTER", sub:"Science", color:"var(--matter)", raw:"#e0b04a",
+    disciplines:["Architecture","Astronomy","Biology","Chemistry","Engineering","Geology","Physics"]}
 ];
 
 const DISC = {
@@ -844,6 +861,172 @@ function buildSocio(){
 /* ============================================================
    WIRING
    ============================================================ */
+
+/* ============================================================
+   LATEST INVENTIONS (last ~25 years) — verified by web search
+   ============================================================ */
+const INVENTIONS = [
+ {group:"In everyday use — on the market"},
+ {y:2003,t:"The Human Genome Project",disc:"Biology",br:"matter",status:"live",
+  why:"Read all 3 billion letters of human DNA — a shared reference for biology.",
+  use:"Launched the entire genomics industry; sequencing a genome is now routine in research and medicine.",
+  cos:[{n:"Illumina",w:"the dominant DNA-sequencing platforms used worldwide",u:"https://www.illumina.com"},
+       {n:"NIH / genome.gov",w:"the open human reference genome",u:"https://www.genome.gov/human-genome-project"},
+       {n:"Consumer genomics",w:"ancestry and health testing (23andMe and others)"}]},
+ {y:2004,t:"Graphene",disc:"Physics",br:"matter",status:"live",
+  why:"A one-atom-thick sheet of carbon, stronger than steel.",
+  use:"Now real in sensors, batteries, composites and low-carbon concrete — though not yet the revolution once hyped.",
+  cos:[{n:"Paragraf (UK)",w:"graphene electronic sensors; made its first 6-inch graphene wafer in 2025",u:"https://www.paragraf.com"},
+       {n:"Graphenea (Spain)",w:"CVD graphene films for chips and sensors",u:"https://www.graphenea.com"},
+       {n:"Cemex + Nationwide Engineering",w:"graphene-enhanced concrete pilot, ~49% less CO2 per unit",u:"https://www.cemex.com"}]},
+ {y:2005,t:"The modified-mRNA platform",disc:"Microbiology",br:"form",status:"live",
+  why:"Made mRNA safe to use in the body — the basis of COVID vaccines.",
+  use:"Billions of COVID doses delivered; personalised cancer vaccines are now in Phase 3.",
+  cos:[{n:"Moderna",w:"COVID vaccine; melanoma cancer vaccine with Merck met its Phase 2b endpoint, now Phase 3",u:"https://www.merck.com/news/moderna-and-merck-announce-mrna-4157-v940-an-investigational-personalized-mrna-cancer-vaccine-in-combination-with-keytruda-pembrolizumab-met-primary-efficacy-endpoint-in-phase-2b-keynote-94/"},
+       {n:"BioNTech / Pfizer",w:"COVID vaccine; off-the-shelf cancer vaccines (BNT111) in trials"}]},
+ {y:2007,t:"The smartphone (iPhone)",disc:"Engineering",br:"matter",status:"live",
+  why:"Put the internet, a camera and a computer in everyone's pocket.",
+  use:"Roughly 4.5 billion users — the dominant computing device on Earth.",
+  cos:[{n:"Apple",w:"iPhone / iOS",u:"https://www.apple.com/iphone/"},
+       {n:"Samsung, Google",w:"the Android ecosystem"}]},
+ {y:2010,t:"The buttressed-core supertall (Burj Khalifa)",disc:"Architecture",br:"matter",status:"live",
+  why:"A buttressed-core design took buildings past 800 metres.",
+  use:"The structural system is now standard engineering for the world's supertall towers.",
+  cos:[{n:"SOM (Skidmore, Owings & Merrill)",w:"designed the buttressed core; the approach is reused in later supertalls",u:"https://www.som.com"}]},
+ {y:2012,t:"Deep learning breaks through (AlexNet)",disc:"Engineering",br:"matter",status:"live",
+  why:"A GPU-trained neural net crushed image recognition — the spark of the AI boom.",
+  use:"Underpins essentially all modern AI: vision, speech, recommendation and generative models.",
+  cos:[{n:"NVIDIA",w:"the GPUs that train AI; now among the world's most valuable companies",u:"https://www.nvidia.com"},
+       {n:"Google, Meta, Microsoft",w:"deep learning across their products"}]},
+ {y:2012,t:"CRISPR-Cas9 gene editing",disc:"Biology",br:"matter",status:"live",
+  why:"Programmable molecular scissors that rewrite DNA — cheap and precise.",
+  use:"The first CRISPR medicine, Casgevy, is approved; ~29 patients infused and 75 treatment centres active by mid-2025.",
+  cos:[{n:"Vertex + CRISPR Therapeutics",w:"Casgevy for sickle cell disease and beta-thalassemia (first approved CRISPR therapy)",u:"https://www.fda.gov/news-events/press-announcements/fda-approves-first-gene-therapies-treat-patients-sickle-cell-disease"},
+       {n:"Intellia, Beam, Editas",w:"in-vivo and next-generation editing therapies in trials",u:"https://ir.crisprtx.com/news-releases/news-release-details/crispr-therapeutics-provides-business-update-and-reports-13/"}]},
+ {y:2013,t:"Word embeddings (word2vec)",disc:"Languages",br:"connection",status:"live",
+  why:"Turned words into vectors of meaning.",
+  use:"Embeddings are foundational to search, recommendation and modern language AI.",
+  cos:[{n:"Google",w:"original work; embeddings power Search, ads and recommendation",u:"https://arxiv.org/abs/1301.3781"}]},
+ {y:2015,t:"Reusable orbital rockets",disc:"Engineering",br:"matter",status:"live",
+  why:"Landed and reflew a booster — cut the cost of reaching orbit sharply.",
+  use:"Reuse is now the industry norm; most payloads to orbit ride reused boosters.",
+  cos:[{n:"SpaceX",w:"Falcon 9 (routine reuse) and Starship",u:"https://www.spacex.com"},
+       {n:"Blue Origin, Rocket Lab",w:"reusable vehicles operating or in development"}]},
+ {y:2017,t:"The Transformer architecture",disc:"Languages",br:"connection",status:"live",
+  why:'"Attention is all you need" — the architecture behind modern AI.',
+  use:"Powers ChatGPT, Claude, Gemini and almost every large AI model in use today.",
+  cos:[{n:"OpenAI, Anthropic, Google",w:"flagship large language models built on transformers",u:"https://arxiv.org/abs/1706.03762"}]},
+ {y:2020,t:"Large language models (GPT-3)",disc:"Languages",br:"connection",status:"live",
+  why:"Showed that scale alone gives language models broad, few-shot ability.",
+  use:"Hundreds of millions of users; a multi-billion-dollar industry built in about five years.",
+  cos:[{n:"OpenAI",w:"GPT / ChatGPT",u:"https://openai.com"},
+       {n:"Anthropic, Google, Meta",w:"competing commercial and open models"}]},
+ {y:2022,t:"Generative-AI image models",disc:"Art",br:"connection",status:"live",
+  why:"Text turns into images — a new, contested medium of visual creation.",
+  use:"Mainstream in design, marketing and media; also legally contested over training data.",
+  cos:[{n:"Adobe Firefly",w:"commercially-indemnified generation inside Photoshop",u:"https://www.adobe.com/products/firefly.html"},
+       {n:"Midjourney",w:"leading artistic image model",u:"https://www.midjourney.com"},
+       {n:"Stability AI / OpenAI",w:"Stable Diffusion (open) and DALL-E"}]},
+ {y:2008,t:"Green fluorescent protein (GFP) tools",disc:"Chemistry",br:"matter",status:"live",
+  why:"Made living cells glow on command — a universal biological tag.",
+  use:"A ubiquitous laboratory and biotech tool, sold as reagents worldwide.",
+  cos:[{n:"Thermo Fisher, Addgene and others",w:"GFP reagents and plasmids are standard in life-science labs"}]},
+
+ {group:"Emerging — early commercial access and clinical trials"},
+ {y:2021,t:"AlphaFold solves protein folding",disc:"Biology",br:"matter",status:"emerging",
+  why:"AI predicted 3-D protein shapes from sequence — a 50-year grand challenge.",
+  use:"Its open database is used by millions of researchers; the drug-discovery arm is entering human trials.",
+  cos:[{n:"Isomorphic Labs (DeepMind)",w:"~$3B deals with Eli Lilly, Novartis and J&J; staffing up for first human trials",u:"https://www.isomorphiclabs.com"},
+       {n:"AlphaFold Protein Structure DB",w:"free predicted structures for ~200 million proteins",u:"https://alphafold.ebi.ac.uk"}]},
+ {y:2006,t:"Induced pluripotent stem cells (iPSC)",disc:"Biology",br:"matter",status:"emerging",
+  why:"Reprogrammed adult cells back to a stem-cell state with four genes.",
+  use:"Multiple iPSC-derived cell therapies are in clinical trials; none broadly approved yet.",
+  cos:[{n:"Aspen Neuroscience",w:"autologous iPSC neuron therapy for Parkinson's (Phase 1/2)",u:"https://aspenneuroscience.com"},
+       {n:"Fate Therapeutics",w:"iPSC-derived immune-cell (NK / CAR) therapies"},
+       {n:"Note",w:"Bayer's BlueRock Parkinson's therapy is related but embryonic-stem-cell-derived, not iPSC"}]},
+ {y:2005,t:"Optogenetics",disc:"Neuroscience",br:"form",status:"emerging",
+  why:"Switch specific neurons on or off with light — precise control of brain circuits.",
+  use:"Still mainly a research tool, but the first human eye-disease trials are restoring partial vision.",
+  cos:[{n:"GenSight Biologics",w:"GS030 restored partial vision in retinitis pigmentosa (PIONEER trial)",u:"https://www.gensight-biologics.com"},
+       {n:"Nanoscope Therapeutics",w:"MCO-010 opsin therapy heading to Phase 3"}]},
+ {y:2019,t:"Quantum computational advantage",disc:"Quantum",br:"form",status:"emerging",
+  why:"A chip did in minutes what classical supercomputers couldn't feasibly do.",
+  use:"Available via the cloud for research and pilots; genuine advantage on practical problems is still years away.",
+  cos:[{n:"IBM Quantum",w:"20-30 cloud-accessible systems; error-correction progress",u:"https://www.ibm.com/quantum"},
+       {n:"Google Quantum AI",w:"Willow chip (2024); targeting a useful error-corrected machine by 2029",u:"https://quantumai.google"},
+       {n:"IonQ, Quantinuum",w:"trapped-ion systems on AWS/Azure; Quantinuum's Helios and a confidential IPO filing"}]},
+
+ {group:"Fundamental research — no commercial product (yet)"},
+ {y:2002,t:"Computational social science",disc:"Sociology",br:"connection",status:"research",
+  why:"Big data plus networks let society be measured at population scale.",
+  use:"Used in academia and inside tech firms for network analytics, but not a product line of its own.",
+  cos:[{n:"Open research",w:"network-science methods across Cornell, Notre Dame, Michigan",u:"https://openalex.org/works?page=1&filter=default.search:computational%20social%20science"}]},
+ {y:2003,t:"Cliodynamics",disc:"History",br:"connection",status:"research",
+  why:"Models historical cycles of stability and collapse with data and equations.",
+  use:"An active research programme; no commercial use.",
+  cos:[{n:"Seshat: Global History Databank",w:"the open historical dataset behind cliodynamics",u:"https://seshatdatabank.info"}]},
+ {y:2003,t:"Randomised trials in development economics",disc:"Metanomics",br:"form",status:"research",
+  why:"Tested anti-poverty policies like medicine — evidence over ideology.",
+  use:"Adopted by governments and NGOs (not companies); won the 2019 Nobel in economics.",
+  cos:[{n:"J-PAL (MIT)",w:"runs and scales policy RCTs worldwide",u:"https://www.povertyactionlab.org"}]},
+ {y:2003,t:"Proof of the Poincare conjecture",disc:"Mathematics",br:"form",status:"research",
+  why:"Solved a million-dollar Millennium Problem.",
+  use:"Pure mathematics — no commercial application; Perelman declined the prize.",
+  cos:[{n:"Clay Mathematics Institute",w:"the Millennium Prize Problem he solved",u:"https://www.claymath.org/millennium-problems/"}]},
+ {y:2012,t:"Discovery of the Higgs boson",disc:"Physics",br:"matter",status:"research",
+  why:"Confirmed the field that gives particles their mass.",
+  use:"Fundamental physics with no direct product — though CERN's tech spins off (the Web, detectors, medical imaging).",
+  cos:[{n:"CERN",w:"the discovery, plus open data and technology transfer",u:"https://home.cern"}]},
+ {y:2016,t:"Gravitational waves detected (LIGO)",disc:"Physics",br:"matter",status:"research",
+  why:"Heard two black holes collide, a century after Einstein predicted the ripples.",
+  use:"Opened a new branch of astronomy; no commercial use.",
+  cos:[{n:"LIGO Scientific Collaboration",w:"open detections and data",u:"https://www.ligo.org"}]},
+ {y:2019,t:"First image of a black hole (EHT)",disc:"Astronomy",br:"matter",status:"research",
+  why:"Photographed the shadow of M87's black hole with a planet-sized virtual telescope.",
+  use:"Observational science — no commercial application.",
+  cos:[{n:"Event Horizon Telescope",w:"the global telescope network",u:"https://eventhorizontelescope.org"}]},
+ {y:2022,t:"James Webb Space Telescope",disc:"Astronomy",br:"matter",status:"research",
+  why:"Sees the earliest galaxies in infrared — the deepest view of the cosmos yet.",
+  use:"Observational science; its data is public for researchers worldwide.",
+  cos:[{n:"NASA / ESA / CSA",w:"the public Webb data archive",u:"https://webb.nasa.gov"}]}
+];
+
+function buildInventions(){
+  const v=els.inventions;
+  const brVar={matter:"var(--matter)",form:"var(--form)",connection:"var(--connection)"};
+  const brName={matter:"Matter · Science",form:"Form · Metascience",connection:"Connection · Social science"};
+  const statusLabel={live:"In everyday use",emerging:"Emerging / early-stage",research:"Research phase"};
+  let h='<div class="socio-intro"><h2>Latest Inventions — and whether they are actually in use</h2>'+
+    '<p>Every breakthrough from the timeline in roughly the last 25 years (2001 onward), pulled into one place. Each card states plainly whether it has reached the real world. Open a card to see who is building on it — the companies, products and trials — with links; where there is no commercial use yet, it says so. Verified by web search in mid-2026; commercialisation moves fast, so treat the company details as a snapshot.</p></div>';
+  h+='<div class="socio-timeline">';
+  INVENTIONS.forEach(it=>{
+    if(it.group){ h+='<div class="era">'+it.group+'</div>'; return; }
+    const node=brVar[it.br]||"var(--connection)";
+    const hasCos=it.cos&&it.cos.length;
+    h+='<div class="scard" style="--node:'+node+'">';
+    h+='<div class="yr">'+it.y+'</div><h3>'+it.t+'</h3>';
+    h+='<div class="who">'+it.disc+' · '+brName[it.br]+'</div>';
+    h+='<span class="inv-status '+it.status+'">'+statusLabel[it.status]+'</span>';
+    h+='<p>'+it.why+'</p>';
+    h+='<button class="inv-toggle" type="button">'+(hasCos?"Who is building on it ↓":"Where to follow it ↓")+'</button>';
+    h+='<div class="inv-detail"><p class="inv-use">'+it.use+'</p>';
+    if(hasCos){
+      it.cos.forEach(c=>{
+        h+='<div class="inv-co"><b>'+c.n+'</b> — '+c.w+(c.u?'<a class="lk" target="_blank" rel="noopener" href="'+c.u+'">link ↗</a>':'')+'</div>';
+      });
+    }
+    h+='</div></div>';
+  });
+  h+='</div>';
+  v.innerHTML='<div class="socio-wrap">'+h+'</div>';
+  v.querySelectorAll('.inv-toggle').forEach(b=>{
+    b.onclick=function(){
+      const open=this.nextElementSibling.classList.toggle('open');
+      this.textContent=this.textContent.replace(/[↓↑]\s*$/, open?'↑':'↓');
+    };
+  });
+}
+
 function render(){ layout(); }
 
 function init(){
@@ -860,6 +1043,7 @@ function init(){
   els.modal=document.getElementById("modal");
   els.modalBody=document.getElementById("modalBody");
   els.socio=document.getElementById("socio-view");
+  els.inventions=document.getElementById("inventions-view");
   els.aboutBack=document.getElementById("aboutBack");
   document.getElementById("builtdate").textContent="built "+new Date().toISOString().slice(0,10);
 
@@ -871,6 +1055,7 @@ function init(){
     document.getElementById("timeline-view").style.display = v==="timeline"?"block":"none";
     document.getElementById("tlHint").style.display = v==="timeline"?"block":"none";
     els.socio.classList.toggle("show", v==="socio");
+    els.inventions.classList.toggle("show", v==="inventions");
     if(v==="timeline") requestAnimationFrame(()=>{ drawConnectors(); syncOverlays(); });
   });
 
@@ -901,6 +1086,7 @@ function init(){
   window.addEventListener("resize",()=>requestAnimationFrame(drawConnectors));
 
   buildSocio();
+  buildInventions();
   render();
 }
 function syncOverlays(){
