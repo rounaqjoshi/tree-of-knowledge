@@ -18,13 +18,13 @@
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;height:100%}
 :root{
-  --paper:#f3ecdd; --navy:#f3ecdd; --navy2:#ece3d0;
-  --panel:rgba(255,253,247,.92); --panel-solid:#fffdf8; --panel2:#fbf6ec;
+  --paper:#ffffff; --navy:#ffffff; --navy2:#ffffff;
+  --panel:rgba(255,255,255,.96); --panel-solid:#ffffff; --panel2:#ffffff;
   --ink:#222748; --ink-soft:#5c6483; --ink-faint:#948c78;
   --gold:#a97f1e; --gold-deep:#856214; --gold-bright:#c9a24a;
   --line:rgba(70,52,18,.16); --line2:rgba(70,52,18,.28); --hair:rgba(45,38,20,.07);
   --matter:#b07d1e; --form:#bc5640; --connection:#2f8763;
-  --matter-soft:rgba(176,125,30,.08); --form-soft:rgba(188,86,64,.07); --connection-soft:rgba(47,135,99,.07);
+  --matter-soft:transparent; --form-soft:transparent; --connection-soft:transparent;
   --shadow:0 1px 2px rgba(60,48,22,.07),0 10px 26px rgba(60,48,22,.10);
   --shadow-lg:0 22px 64px rgba(50,40,18,.22);
   --glow:0 0 0 1px rgba(169,127,30,.5),0 10px 30px rgba(169,127,30,.2);
@@ -34,18 +34,15 @@ html,body{margin:0;padding:0;height:100%}
 }
 body{font-family:var(--sans);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;
   display:flex;flex-direction:column;overflow:hidden;
-  background:
-    radial-gradient(1300px 760px at 16% -10%, rgba(176,125,30,.13), transparent 58%),
-    radial-gradient(1000px 820px at 102% -4%, rgba(47,135,99,.07), transparent 54%),
-    linear-gradient(180deg,#f7f1e4,#f2eada 60%,#efe6d2)}
+  background:#ffffff}
 a{color:inherit}
 
-header.top{flex:0 0 auto;z-index:60;background:linear-gradient(180deg,rgba(247,241,228,.95),rgba(247,241,228,.82));backdrop-filter:saturate(1.2) blur(10px);border-bottom:1px solid var(--line)}
+header.top{flex:0 0 auto;z-index:60;background:rgba(255,255,255,.92);backdrop-filter:saturate(1.2) blur(10px);border-bottom:1px solid var(--line)}
 .top-row{display:flex;align-items:center;gap:18px;padding:13px 22px;flex-wrap:wrap}
 .logo{display:flex;align-items:center;gap:14px}
 .logo .mark{width:48px;height:48px;border-radius:50%;flex:0 0 auto;object-fit:cover;box-shadow:0 0 0 1px var(--gold-deep),0 0 0 4px rgba(216,178,94,.12),0 6px 18px rgba(0,0,0,.5)}
 .logo .brand{font-size:10.5px;letter-spacing:2.6px;color:var(--gold);font-weight:800;text-transform:uppercase}
-.logo h1{font-family:var(--serif);font-size:27px;margin:0;letter-spacing:.2px;font-weight:700;line-height:1.02;color:var(--ink)}
+.logo h1{font-family:var(--serif);font-size:34px;margin:0;letter-spacing:.2px;font-weight:700;line-height:1.02;color:var(--ink)}
 .tabs{display:flex;gap:4px;background:rgba(40,32,12,.05);border:1px solid var(--line);border-radius:999px;padding:4px}
 .tab{font-size:13px;border:0;background:transparent;color:var(--ink-soft);padding:8px 16px;border-radius:999px;cursor:pointer;transition:.15s;font-weight:700;white-space:nowrap;font-family:var(--sans)}
 .tab:hover{color:var(--ink)}
@@ -77,7 +74,7 @@ header.top{flex:0 0 auto;z-index:60;background:linear-gradient(180deg,rgba(247,2
 .gridlines .colsep{position:absolute;top:0;bottom:0;width:1px;background:var(--hair)}
 .gridlines .band{position:absolute;top:0;bottom:0}
 
-.col-header{position:absolute;top:0;left:0;right:0;height:var(--headH);overflow:hidden;z-index:40;background:linear-gradient(180deg,rgba(247,241,228,.97),rgba(247,241,228,.9));backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.col-header{position:absolute;top:0;left:0;right:0;height:var(--headH);overflow:hidden;z-index:40;background:rgba(255,255,255,.96);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
 .header-inner{position:absolute;top:0;left:0;height:100%;will-change:transform}
 .brband{position:absolute;top:9px;height:32px;display:flex;align-items:center;gap:9px;padding:0 14px;border-radius:9px;cursor:pointer;transition:.15s;user-select:none}
 .brband:hover{background:rgba(40,32,12,.05)}
@@ -85,20 +82,21 @@ header.top{flex:0 0 auto;z-index:60;background:linear-gradient(180deg,rgba(247,2
 .brband .nm{font-family:var(--serif);font-size:18px;font-weight:700;letter-spacing:1px}
 .brband .sub{font-size:9.5px;font-weight:700;letter-spacing:.6px;color:var(--ink-soft);text-transform:uppercase}
 .brband .chev{margin-left:4px;font-size:11px;color:var(--ink-faint)}
-.brband.vert{flex-direction:column;justify-content:flex-start;height:auto;top:9px;padding:10px 0;align-items:center;gap:7px}
-.brband.vert .nm{writing-mode:vertical-rl;transform:rotate(180deg);letter-spacing:2px;font-size:15px}
+.brband.collapsed{justify-content:flex-start;overflow:hidden}
+.brband.collapsed .nm{font-size:14px;letter-spacing:.8px;white-space:nowrap}
+.brband.collapsed .chev{margin-left:auto}
 .disc-head{position:absolute;top:50px;height:calc(var(--headH) - 58px);padding:8px 11px 9px;border-left:1px solid var(--hair);display:flex;flex-direction:column;gap:3px;overflow:hidden}
 .disc-head b{font-family:var(--serif);font-size:15px;font-weight:600;line-height:1.04;color:var(--ink)}
 .disc-head small{font-size:9.5px;color:var(--ink-faint);line-height:1.22;display:block;overflow:hidden;flex:1 1 auto}
 .disc-head .latest{font-size:8.5px;color:var(--ink-soft);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:2px 8px;align-self:flex-start;transition:.15s;white-space:nowrap}
 .disc-head .latest:hover{background:var(--gold);color:#241a08;border-color:var(--gold)}
 
-.year-axis{position:absolute;top:var(--headH);left:0;bottom:0;width:var(--gutW);overflow:hidden;z-index:42;background:linear-gradient(90deg,rgba(247,241,228,.97),rgba(247,241,228,.82));border-right:1px solid var(--line)}
+.year-axis{position:absolute;top:var(--headH);left:0;bottom:0;width:var(--gutW);overflow:hidden;z-index:42;background:rgba(255,255,255,.94);border-right:1px solid var(--line)}
 .axis-inner{position:absolute;top:0;left:0;width:100%;will-change:transform}
 .ytick{position:absolute;left:0;width:100%;padding-right:11px;text-align:right;transform:translateY(-50%)}
 .ytick .y{font-family:var(--serif);font-size:15px;font-weight:600;color:var(--gold);line-height:1.05}
 .ytick .e{display:block;font-size:8px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.6px;margin-top:1px}
-.corner{position:absolute;top:0;left:0;width:var(--gutW);height:var(--headH);z-index:44;background:rgba(243,236,221,.98);border-right:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;text-align:center}
+.corner{position:absolute;top:0;left:0;width:var(--gutW);height:var(--headH);z-index:44;background:#ffffff;border-right:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;text-align:center}
 .corner span{font-family:var(--serif);font-size:14px;font-weight:600;color:var(--gold);line-height:1.12;letter-spacing:.3px}
 
 #cards{position:absolute;inset:0;z-index:5}
@@ -186,7 +184,6 @@ header.top{flex:0 0 auto;z-index:60;background:linear-gradient(180deg,rgba(247,2
 <header class="top">
   <div class="top-row">
     <div class="logo">
-      <img class="mark" src="assets/ronnie-medallion.png" alt="Stories by Ronnie">
       <div>
         <div class="brand">Stories by Ronnie</div>
         <h1>The Tree of Knowledge</h1>
@@ -216,8 +213,12 @@ header.top{flex:0 0 auto;z-index:60;background:linear-gradient(180deg,rgba(247,2
     <div class="grp"><span class="swatch" style="background:var(--form);color:var(--form)"></span><b style="color:var(--form)">FORM</b> · Metascience</div>
     <div class="grp"><span class="swatch" style="background:var(--matter);color:var(--matter)"></span><b style="color:var(--matter)">MATTER</b> · Science</div>
     <div class="conn-key">
-      <svg width="40" height="12"><line x1="0" y1="6" x2="32" y2="6" stroke="#a97f1e" stroke-width="2" stroke-dasharray="5 4"/><polygon points="32,1 40,6 32,11" fill="#a97f1e"/></svg>
-      builds on → led to
+      <svg width="34" height="12"><line x1="0" y1="6" x2="26" y2="6" stroke="#111111" stroke-width="2" stroke-dasharray="5 4"/><polygon points="26,1 34,6 26,11" fill="#111111"/></svg>
+      builds on
+    </div>
+    <div class="conn-key">
+      <svg width="34" height="12"><line x1="0" y1="6" x2="26" y2="6" stroke="#c2c2c2" stroke-width="2" stroke-dasharray="5 4"/><polygon points="26,1 34,6 26,11" fill="#c2c2c2"/></svg>
+      led to
     </div>
     <div class="grp" style="font-style:italic">Time flows downward · disciplines run across · click any card.</div>
   </div>
@@ -616,7 +617,7 @@ function yScale(year){
   return PAD_T + SCALE[SCALE.length-1][1];
 }
 /* horizontal layout: each discipline is a column */
-const COL_W = 212, COLLAPSED_W = 60;
+const COL_W = 212, COLLAPSED_W = 150;
 let SCENE_W = 0, SCENE_H = yScale(2026) + PAD_B;
 let colX = {}, branchSpan = {};   /* recomputed every layout */
 function xCol(disc){ return colX[disc]; }
@@ -694,7 +695,7 @@ function layout(){
   BRANCHES.forEach(br=>{
     const sp=branchSpan[br.key];
     const band=document.createElement("div");
-    band.className="brband"+(sp.collapsed?" vert":"");
+    band.className="brband"+(sp.collapsed?" collapsed":"");
     band.style.left=sp.x+"px"; band.style.width=sp.w+"px";
     if(sp.collapsed){
       band.innerHTML='<span class="dot" style="background:'+br.color+';color:'+br.color+'"></span><span class="nm" style="color:'+br.color+'">'+br.name+'</span><span class="chev">▸</span>';
