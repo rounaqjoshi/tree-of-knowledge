@@ -99,6 +99,15 @@ header.top{flex:0 0 auto;z-index:60;background:rgba(255,255,255,.92);backdrop-fi
 .corner{position:absolute;top:0;left:0;width:var(--gutW);height:var(--headH);z-index:44;background:#ffffff;border-right:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;text-align:center}
 .corner span{font-family:var(--serif);font-size:14px;font-weight:600;color:var(--gold);line-height:1.12;letter-spacing:.3px}
 
+/* --- Auto-hiding top chrome on touch devices (iPad/iPhone): collapse the app bar + column headers while
+   scrolling down so the card canvas gets more room (mind-map feel); they slide back in on scroll up. --- */
+header.top,.hint{transition:transform .3s ease,opacity .25s ease}
+#timeline-view{transition:margin-top .3s ease}
+.col-header,.corner{transition:transform .3s ease,opacity .25s ease}
+body.chrome-hidden header.top,body.chrome-hidden .hint{transform:translateY(-100%);opacity:0;pointer-events:none}
+body.chrome-hidden #timeline-view{margin-top:calc(-1 * var(--chromeH,0px))}
+body.chrome-hidden .col-header,body.chrome-hidden .corner{transform:translateY(-110%);opacity:0;pointer-events:none}
+
 #cards{position:absolute;inset:0;z-index:5}
 .card{position:absolute;border-radius:11px;background:var(--panel);backdrop-filter:blur(3px);cursor:pointer;border:1px solid var(--line);box-shadow:var(--shadow);padding:9px 11px 10px 14px;overflow:hidden;transition:transform .14s ease,box-shadow .14s ease,opacity .2s,border-color .14s}
 .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ac,var(--gold))}
@@ -1079,11 +1088,12 @@ function init(){
     document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
     t.classList.add("active");
     const v=t.dataset.view;
+    setChromeHidden(false); _lastScrollY=0;
     document.getElementById("timeline-view").style.display = v==="timeline"?"block":"none";
     document.getElementById("tlHint").style.display = v==="timeline"?"block":"none";
     els.socio.classList.toggle("show", v==="socio");
     els.inventions.classList.toggle("show", v==="inventions");
-    if(v==="timeline") requestAnimationFrame(()=>{ drawConnectors(); syncOverlays(); });
+    if(v==="timeline") requestAnimationFrame(()=>{ drawConnectors(); syncOverlays(); measureChrome(); });
   });
 
   // search
@@ -1109,12 +1119,33 @@ function init(){
   els.modalBack.onclick=e=>{ if(e.target===els.modalBack) closeModal(); };
   document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closeModal(); els.aboutBack.classList.remove("show"); } });
   // sticky overlays follow the canvas scroll
-  els.scroll.addEventListener("scroll",syncOverlays,{passive:true});
-  window.addEventListener("resize",()=>requestAnimationFrame(drawConnectors));
+  els.scroll.addEventListener("scroll",()=>{ syncOverlays(); if(CHROME_TOUCH) autoHideChrome(); },{passive:true});
+  window.addEventListener("resize",()=>requestAnimationFrame(()=>{ drawConnectors(); measureChrome(); }));
 
   buildSocio();
   buildInventions();
   render();
+  requestAnimationFrame(measureChrome);
+}
+// --- Auto-hide the top chrome on touch devices (iPad/iPhone) for a roomier, mind-map-like canvas ---
+const CHROME_TOUCH = !!(window.matchMedia && window.matchMedia('(pointer:coarse)').matches);
+let _lastScrollY = 0, _chromeHidden = false;
+function measureChrome(){
+  const h=document.querySelector('header.top'), hint=document.getElementById('tlHint');
+  const hh=(h?h.offsetHeight:0)+((hint&&getComputedStyle(hint).display!=='none')?hint.offsetHeight:0);
+  document.documentElement.style.setProperty('--chromeH', hh+'px');
+}
+function setChromeHidden(hide){
+  if(hide===_chromeHidden) return;
+  _chromeHidden=hide;
+  document.body.classList.toggle('chrome-hidden',hide);
+}
+function autoHideChrome(){
+  const y=els.scroll.scrollTop, dy=y-_lastScrollY;
+  if(y<80){ setChromeHidden(false); _lastScrollY=y; return; } // always reveal near the top
+  if(dy>6) setChromeHidden(true);          // scrolling down -> hide
+  else if(dy<-6) setChromeHidden(false);   // scrolling up -> reveal
+  if(Math.abs(dy)>2) _lastScrollY=y;
 }
 function syncOverlays(){
   if(!els.scroll||!els.headerInner) return;
