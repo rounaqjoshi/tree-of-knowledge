@@ -30,7 +30,7 @@ html,body{margin:0;padding:0;height:100%}
   --glow:0 0 0 1px rgba(169,127,30,.5),0 10px 30px rgba(169,127,30,.2);
   --sans:'Mulish',ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
   --serif:'Cormorant Garamond',Georgia,"Times New Roman",serif;
-  --headH:114px; --gutW:96px;
+  --headH:114px; --gutW:58px;
 }
 body{font-family:var(--sans);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;
   display:flex;flex-direction:column;overflow:hidden;
@@ -94,24 +94,17 @@ header.top{flex:0 0 auto;z-index:60;background:#ffffff;border-bottom:1px solid v
 
 .year-axis{position:absolute;top:var(--headH);left:0;bottom:0;width:var(--gutW);overflow:hidden;z-index:42;background:rgba(255,255,255,.94);border-right:1px solid var(--line)}
 .axis-inner{position:absolute;top:0;left:0;width:100%;transform-origin:0 0;will-change:transform}
-.ytick{position:absolute;left:0;width:100%;padding-right:11px;text-align:right;transform:translateY(-50%)}
-.ytick .y{font-family:var(--serif);font-size:15px;font-weight:600;color:var(--gold);line-height:1.05}
+.ytick{position:absolute;left:0;width:100%;padding-right:6px;text-align:right;transform:translateY(-50%)}
+.ytick .y{font-family:var(--serif);font-size:12.5px;font-weight:600;color:var(--gold);line-height:1.05}
 .ytick .e{display:block;font-size:8px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.6px;margin-top:1px}
 .corner{position:absolute;top:0;left:0;width:var(--gutW);height:var(--headH);z-index:44;background:#ffffff;border-right:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;text-align:center}
-.corner span{font-family:var(--serif);font-size:14px;font-weight:600;color:var(--gold);line-height:1.12;letter-spacing:.3px}
+.corner span{font-family:var(--serif);font-size:10px;font-weight:600;color:var(--gold);line-height:1.1;letter-spacing:.2px}
 
-/* --- Minimize-on-scroll: when scrolling the canvas down, the tall app bar collapses to a thin
-   strip (title + Connection/Form/Matter). No layout is animated (one instant reflow), so there is
-   no per-frame jank; only the strip fades in. The column ruler + date ruler stay put. --- */
-.minibar{display:none;align-items:center;gap:14px;padding:9px 22px;min-height:46px}
-.minibar .mini-brand{font-family:var(--serif);font-size:19px;font-weight:700;color:var(--ink);white-space:nowrap;letter-spacing:.2px}
-.minibar .mini-cats{display:flex;align-items:center;gap:14px;margin-left:auto;flex-wrap:wrap}
-.minibar .mc{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:var(--ink-soft);white-space:nowrap}
-.minibar .mc i{width:10px;height:10px;border-radius:50%;box-shadow:0 0 8px currentColor}
-body.mini header.top>.top-row,body.mini header.top>.legend{display:none}
-body.mini header.top>.minibar{display:flex;animation:miniIn .18s ease}
+/* --- Hide-top-on-scroll: the whole app bar is removed from the layout while the canvas is
+   scrolled (one instant reflow, no animation = smooth), giving the cards full height. It comes
+   back only at the very top. The column ruler + date ruler stay put. --- */
+body.mini header.top{display:none}
 body.mini .hint{display:none}
-@keyframes miniIn{from{opacity:0}to{opacity:1}}
 
 /* --- Zoom controls (also pinch / ctrl-wheel). Floating, thumb-reachable. --- */
 .zoom-ctrl{position:absolute;right:14px;bottom:16px;z-index:50;display:flex;flex-direction:column;gap:6px}
@@ -242,14 +235,6 @@ body.mini .hint{display:none}
       led to
     </div>
     <div class="grp" style="font-style:italic">Time flows downward · disciplines run across · click any card.</div>
-  </div>
-  <div class="minibar">
-    <span class="mini-brand">The Tree of Knowledge</span>
-    <span class="mini-cats">
-      <span class="mc"><i style="background:var(--connection);color:var(--connection)"></i>Connection</span>
-      <span class="mc"><i style="background:var(--form);color:var(--form)"></i>Form</span>
-      <span class="mc"><i style="background:var(--matter);color:var(--matter)"></i>Matter</span>
-    </span>
   </div>
 </header>
 
@@ -643,7 +628,7 @@ const SCALE = [
  [1900,1740],[1925,2030],[1950,2400],[1970,2860],[1980,3320],[1990,3960],
  [2000,4780],[2010,5680],[2020,6600],[2026,7000]
 ];
-const HEADH = 114, GUTW = 96, PAD_T = HEADH + 40, PAD_B = 160;
+const HEADH = 114, GUTW = 58, PAD_T = HEADH + 40, PAD_B = 160;
 function yScale(year){
   if(year<=SCALE[0][0]) return PAD_T + SCALE[0][1];
   for(let i=0;i<SCALE.length-1;i++){
@@ -1116,7 +1101,7 @@ function init(){
     document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
     t.classList.add("active");
     const v=t.dataset.view;
-    setMini(false); _lastY=0;
+    setMini(false);
     document.getElementById("timeline-view").style.display = v==="timeline"?"block":"none";
     document.getElementById("tlHint").style.display = v==="timeline"?"block":"none";
     els.socio.classList.toggle("show", v==="socio");
@@ -1208,20 +1193,15 @@ function resetZoom(){ zoomAt(1, els.scroll.clientWidth/2, els.scroll.clientHeigh
 function updateZoomLabel(){ const b=document.getElementById('zoomReset'); if(b) b.textContent=Math.round(zoom*100)+'%'; }
 
 /* ============================================================
-   MINIMIZE-ON-SCROLL — collapse the tall app bar to a thin
-   strip (title + Connection/Form/Matter) when scrolling down,
-   restore on scroll-up / near the top. No layout is animated
-   (a single instant reflow), so scrolling stays smooth.
+   HIDE-TOP-ON-SCROLL — the full app bar shows ONLY when the
+   canvas is scrolled all the way to the top; any scroll-away
+   hides it entirely (display:none = one instant reflow, no
+   animation, so scrolling stays smooth). The column + date
+   rulers stay put.
    ============================================================ */
-let _lastY = 0, _mini = false;
+let _mini = false;
 function setMini(on){ if(on!==_mini){ _mini=on; document.body.classList.toggle('mini', on); } }
-function autoMini(){
-  const y = els.scroll.scrollTop, dy = y - _lastY;
-  if(y < 70){ setMini(false); _lastY = y; return; }   // always full near the top
-  if(dy > 8) setMini(true);                            // scrolling down -> minimize
-  else if(dy < -8) setMini(false);                     // scrolling up   -> restore
-  if(Math.abs(dy) > 3) _lastY = y;
-}
+function autoMini(){ setMini(els.scroll.scrollTop > 6); }
 
 function syncOverlays(){
   if(!els.scroll||!els.headerInner) return;
