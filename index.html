@@ -37,7 +37,7 @@ body{font-family:var(--sans);color:var(--ink);font-size:14px;-webkit-font-smooth
   background:#ffffff}
 a{color:inherit}
 
-header.top{flex:0 0 auto;z-index:60;background:rgba(255,255,255,.92);backdrop-filter:saturate(1.2) blur(10px);border-bottom:1px solid var(--line)}
+header.top{flex:0 0 auto;z-index:60;background:#ffffff;border-bottom:1px solid var(--line)}
 .top-row{display:flex;align-items:center;gap:18px;padding:13px 22px;flex-wrap:wrap}
 .logo{display:flex;align-items:center;gap:14px}
 .logo .mark{width:48px;height:48px;border-radius:50%;flex:0 0 auto;object-fit:cover;box-shadow:0 0 0 1px var(--gold-deep),0 0 0 4px rgba(216,178,94,.12),0 6px 18px rgba(0,0,0,.5)}
@@ -67,15 +67,16 @@ header.top{flex:0 0 auto;z-index:60;background:rgba(255,255,255,.92);backdrop-fi
 .hint{flex:0 0 auto;font-size:12px;color:var(--ink-faint);padding:9px 22px;border-bottom:1px solid var(--hair)}
 
 #timeline-view{flex:1 1 auto;min-height:0;position:relative}
-.scroll-wrap{position:absolute;inset:0;overflow:auto}
-.scene{position:relative}
+.scroll-wrap{position:absolute;inset:0;overflow:auto;-webkit-overflow-scrolling:touch}
+#sceneSizer{position:relative;overflow:hidden}
+.scene{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform}
 .gridlines{position:absolute;inset:0;pointer-events:none;z-index:1}
 .gridlines .row{position:absolute;left:0;right:0;height:0;border-top:1px solid var(--hair)}
 .gridlines .colsep{position:absolute;top:0;bottom:0;width:1px;background:var(--hair)}
 .gridlines .band{position:absolute;top:0;bottom:0}
 
-.col-header{position:absolute;top:0;left:0;right:0;height:var(--headH);overflow:hidden;z-index:40;background:rgba(255,255,255,.96);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
-.header-inner{position:absolute;top:0;left:0;height:100%;will-change:transform}
+.col-header{position:absolute;top:0;left:0;right:0;height:var(--headH);overflow:hidden;z-index:40;background:#ffffff;border-bottom:1px solid var(--line)}
+.header-inner{position:absolute;top:0;left:0;height:100%;transform-origin:0 0;will-change:transform}
 .brband{position:absolute;top:9px;height:32px;display:flex;align-items:center;gap:9px;padding:0 14px;border-radius:9px;cursor:pointer;transition:.15s;user-select:none}
 .brband:hover{background:rgba(40,32,12,.05)}
 .brband .dot{width:9px;height:9px;border-radius:50%;box-shadow:0 0 9px currentColor;flex:0 0 auto}
@@ -92,24 +93,35 @@ header.top{flex:0 0 auto;z-index:60;background:rgba(255,255,255,.92);backdrop-fi
 .disc-head .latest:hover{background:var(--gold);color:#241a08;border-color:var(--gold)}
 
 .year-axis{position:absolute;top:var(--headH);left:0;bottom:0;width:var(--gutW);overflow:hidden;z-index:42;background:rgba(255,255,255,.94);border-right:1px solid var(--line)}
-.axis-inner{position:absolute;top:0;left:0;width:100%;will-change:transform}
+.axis-inner{position:absolute;top:0;left:0;width:100%;transform-origin:0 0;will-change:transform}
 .ytick{position:absolute;left:0;width:100%;padding-right:11px;text-align:right;transform:translateY(-50%)}
 .ytick .y{font-family:var(--serif);font-size:15px;font-weight:600;color:var(--gold);line-height:1.05}
 .ytick .e{display:block;font-size:8px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.6px;margin-top:1px}
 .corner{position:absolute;top:0;left:0;width:var(--gutW);height:var(--headH);z-index:44;background:#ffffff;border-right:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;text-align:center}
 .corner span{font-family:var(--serif);font-size:14px;font-weight:600;color:var(--gold);line-height:1.12;letter-spacing:.3px}
 
-/* --- Auto-hiding top chrome on touch devices (iPad/iPhone): collapse the app bar + column headers while
-   scrolling down so the card canvas gets more room (mind-map feel); they slide back in on scroll up. --- */
-header.top,.hint{transition:transform .3s ease,opacity .25s ease}
-#timeline-view{transition:margin-top .3s ease}
-.col-header,.corner{transition:transform .3s ease,opacity .25s ease}
-body.chrome-hidden header.top,body.chrome-hidden .hint{transform:translateY(-100%);opacity:0;pointer-events:none}
-body.chrome-hidden #timeline-view{margin-top:calc(-1 * var(--chromeH,0px))}
-body.chrome-hidden .col-header,body.chrome-hidden .corner{transform:translateY(-110%);opacity:0;pointer-events:none}
+/* --- Minimize-on-scroll: when scrolling the canvas down, the tall app bar collapses to a thin
+   strip (title + Connection/Form/Matter). No layout is animated (one instant reflow), so there is
+   no per-frame jank; only the strip fades in. The column ruler + date ruler stay put. --- */
+.minibar{display:none;align-items:center;gap:14px;padding:9px 22px;min-height:46px}
+.minibar .mini-brand{font-family:var(--serif);font-size:19px;font-weight:700;color:var(--ink);white-space:nowrap;letter-spacing:.2px}
+.minibar .mini-cats{display:flex;align-items:center;gap:14px;margin-left:auto;flex-wrap:wrap}
+.minibar .mc{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:var(--ink-soft);white-space:nowrap}
+.minibar .mc i{width:10px;height:10px;border-radius:50%;box-shadow:0 0 8px currentColor}
+body.mini header.top>.top-row,body.mini header.top>.legend{display:none}
+body.mini header.top>.minibar{display:flex;animation:miniIn .18s ease}
+body.mini .hint{display:none}
+@keyframes miniIn{from{opacity:0}to{opacity:1}}
+
+/* --- Zoom controls (also pinch / ctrl-wheel). Floating, thumb-reachable. --- */
+.zoom-ctrl{position:absolute;right:14px;bottom:16px;z-index:50;display:flex;flex-direction:column;gap:6px}
+.zoom-ctrl button{width:42px;height:42px;border-radius:12px;border:1px solid var(--line2);background:#ffffff;color:var(--ink);font-size:21px;font-weight:700;line-height:1;cursor:pointer;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:background .12s,transform .08s}
+.zoom-ctrl button:active{transform:scale(.94)}
+.zoom-ctrl button:hover{background:var(--panel2,#f6f6f3)}
+.zoom-ctrl #zoomReset{font-size:13px;height:34px}
 
 #cards{position:absolute;inset:0;z-index:5}
-.card{position:absolute;border-radius:11px;background:var(--panel);backdrop-filter:blur(3px);cursor:pointer;border:1px solid var(--line);box-shadow:var(--shadow);padding:9px 11px 10px 14px;overflow:hidden;transition:transform .14s ease,box-shadow .14s ease,opacity .2s,border-color .14s}
+.card{position:absolute;border-radius:11px;background:#ffffff;cursor:pointer;border:1px solid var(--line);box-shadow:var(--shadow);padding:9px 11px 10px 14px;overflow:hidden;transition:transform .14s ease,box-shadow .14s ease,opacity .2s,border-color .14s}
 .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ac,var(--gold))}
 .card:hover{transform:translateY(-2px) scale(1.014);box-shadow:var(--glow),var(--shadow-lg);z-index:30;border-color:var(--line2)}
 .card .yr{font-family:var(--serif);font-weight:700;font-size:15px;line-height:1;color:var(--ac,var(--gold))}
@@ -231,21 +243,36 @@ body.chrome-hidden .col-header,body.chrome-hidden .corner{transform:translateY(-
     </div>
     <div class="grp" style="font-style:italic">Time flows downward · disciplines run across · click any card.</div>
   </div>
+  <div class="minibar">
+    <span class="mini-brand">The Tree of Knowledge</span>
+    <span class="mini-cats">
+      <span class="mc"><i style="background:var(--connection);color:var(--connection)"></i>Connection</span>
+      <span class="mc"><i style="background:var(--form);color:var(--form)"></i>Form</span>
+      <span class="mc"><i style="background:var(--matter);color:var(--matter)"></i>Matter</span>
+    </span>
+  </div>
 </header>
 
 <div class="hint" id="tlHint">Scroll <b style="color:var(--gold)">down</b> to travel forward through time · scroll <b style="color:var(--gold)">sideways</b> across the disciplines · the modern era is stretched so recent centuries can breathe. Click a branch heading to fold it.</div>
 
 <section id="timeline-view">
   <div class="scroll-wrap" id="scroll">
-    <div class="scene" id="scene">
-      <div class="gridlines" id="grid"></div>
-      <svg id="connectors"></svg>
-      <div id="cards"></div>
+    <div id="sceneSizer">
+      <div class="scene" id="scene">
+        <div class="gridlines" id="grid"></div>
+        <svg id="connectors"></svg>
+        <div id="cards"></div>
+      </div>
     </div>
   </div>
   <div class="col-header" id="colHeader"><div class="header-inner" id="headerInner"></div></div>
   <div class="year-axis" id="yearAxis"><div class="axis-inner" id="axisInner"></div></div>
   <div class="corner"><span>Tree of<br>Knowledge</span></div>
+  <div class="zoom-ctrl">
+    <button id="zoomIn" title="Zoom in" aria-label="Zoom in">+</button>
+    <button id="zoomReset" title="Reset zoom" aria-label="Reset zoom">100%</button>
+    <button id="zoomOut" title="Zoom out" aria-label="Zoom out">−</button>
+  </div>
 </section>
 
 <section id="socio-view"></section>
@@ -760,7 +787,7 @@ function layout(){
   });
 
   applySearchDim();
-  syncOverlays();
+  applyZoom();
   requestAnimationFrame(drawConnectors);
 }
 
@@ -1067,6 +1094,7 @@ function render(){ layout(); }
 
 function init(){
   els.scene=document.getElementById("scene");
+  els.sizer=document.getElementById("sceneSizer");
   els.grid=document.getElementById("grid");
   els.conn=document.getElementById("connectors");
   els.cards=document.getElementById("cards");
@@ -1088,12 +1116,12 @@ function init(){
     document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
     t.classList.add("active");
     const v=t.dataset.view;
-    setChromeHidden(false); _lastScrollY=0;
+    setMini(false); _lastY=0;
     document.getElementById("timeline-view").style.display = v==="timeline"?"block":"none";
     document.getElementById("tlHint").style.display = v==="timeline"?"block":"none";
     els.socio.classList.toggle("show", v==="socio");
     els.inventions.classList.toggle("show", v==="inventions");
-    if(v==="timeline") requestAnimationFrame(()=>{ drawConnectors(); syncOverlays(); measureChrome(); });
+    if(v==="timeline") requestAnimationFrame(()=>{ drawConnectors(); syncOverlays(); });
   });
 
   // search
@@ -1119,38 +1147,87 @@ function init(){
   els.modalBack.onclick=e=>{ if(e.target===els.modalBack) closeModal(); };
   document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closeModal(); els.aboutBack.classList.remove("show"); } });
   // sticky overlays follow the canvas scroll
-  els.scroll.addEventListener("scroll",()=>{ syncOverlays(); if(CHROME_TOUCH) autoHideChrome(); },{passive:true});
-  window.addEventListener("resize",()=>requestAnimationFrame(()=>{ drawConnectors(); measureChrome(); }));
+  els.scroll.addEventListener("scroll",()=>{ syncOverlays(); autoMini(); },{passive:true});
+  window.addEventListener("resize",()=>requestAnimationFrame(drawConnectors));
+
+  // ---- zoom: buttons ----
+  document.getElementById("zoomIn").onclick    = ()=>zoomByCenter(1.25);
+  document.getElementById("zoomOut").onclick   = ()=>zoomByCenter(0.8);
+  document.getElementById("zoomReset").onclick = resetZoom;
+  // ---- zoom: ctrl / trackpad-pinch wheel (a plain wheel still scrolls the canvas) ----
+  els.scroll.addEventListener("wheel",e=>{
+    if(!e.ctrlKey && !e.metaKey) return;
+    e.preventDefault();
+    const r=els.scroll.getBoundingClientRect();
+    zoomAt(zoom*Math.pow(1.0016,-e.deltaY), e.clientX-r.left, e.clientY-r.top);
+  },{passive:false});
+  // ---- zoom: iOS Safari two-finger pinch ----
+  let _gz=1;
+  els.scroll.addEventListener("gesturestart",e=>{ e.preventDefault(); _gz=zoom; },{passive:false});
+  els.scroll.addEventListener("gesturechange",e=>{
+    e.preventDefault();
+    const r=els.scroll.getBoundingClientRect();
+    zoomAt(_gz*e.scale, e.clientX-r.left, e.clientY-r.top);
+  },{passive:false});
+  els.scroll.addEventListener("gestureend",e=>{ e.preventDefault(); },{passive:false});
 
   buildSocio();
   buildInventions();
   render();
-  requestAnimationFrame(measureChrome);
 }
-// --- Auto-hide the top chrome on touch devices (iPad/iPhone) for a roomier, mind-map-like canvas ---
-const CHROME_TOUCH = !!(window.matchMedia && window.matchMedia('(pointer:coarse)').matches);
-let _lastScrollY = 0, _chromeHidden = false;
-function measureChrome(){
-  const h=document.querySelector('header.top'), hint=document.getElementById('tlHint');
-  const hh=(h?h.offsetHeight:0)+((hint&&getComputedStyle(hint).display!=='none')?hint.offsetHeight:0);
-  document.documentElement.style.setProperty('--chromeH', hh+'px');
+/* ============================================================
+   ZOOM — transform-scale the scene; the frozen panes (column
+   header + year axis) scale in lockstep so everything stays
+   aligned. Uniform scaling means cards never overlap.
+   ============================================================ */
+let zoom = 1;
+const MINZ = 0.5, MAXZ = 2.6;
+
+function applyZoom(){
+  if(!els.scene) return;
+  els.scene.style.transform = "scale("+zoom+")";
+  if(els.sizer){ els.sizer.style.width=(SCENE_W*zoom)+"px"; els.sizer.style.height=(SCENE_H*zoom)+"px"; }
+  syncOverlays();
+  updateZoomLabel();
 }
-function setChromeHidden(hide){
-  if(hide===_chromeHidden) return;
-  _chromeHidden=hide;
-  document.body.classList.toggle('chrome-hidden',hide);
+// zoom while keeping the scene point under (fx,fy) — viewport-relative — fixed under the fingers/cursor
+function zoomAt(nz, fx, fy){
+  nz = Math.max(MINZ, Math.min(MAXZ, nz));
+  if(Math.abs(nz-zoom) < 0.0005) return;
+  const z0 = zoom;
+  const sx = (els.scroll.scrollLeft + fx) / z0;
+  const sy = (els.scroll.scrollTop  + fy) / z0;
+  zoom = nz; applyZoom();
+  els.scroll.scrollLeft = sx*zoom - fx;
+  els.scroll.scrollTop  = sy*zoom - fy;
+  syncOverlays();
+  updateZoomLabel();
 }
-function autoHideChrome(){
-  const y=els.scroll.scrollTop, dy=y-_lastScrollY;
-  if(y<80){ setChromeHidden(false); _lastScrollY=y; return; } // always reveal near the top
-  if(dy>6) setChromeHidden(true);          // scrolling down -> hide
-  else if(dy<-6) setChromeHidden(false);   // scrolling up -> reveal
-  if(Math.abs(dy)>2) _lastScrollY=y;
+function zoomByCenter(f){ zoomAt(zoom*f, els.scroll.clientWidth/2, els.scroll.clientHeight/2); }
+function resetZoom(){ zoomAt(1, els.scroll.clientWidth/2, els.scroll.clientHeight/2); }
+function updateZoomLabel(){ const b=document.getElementById('zoomReset'); if(b) b.textContent=Math.round(zoom*100)+'%'; }
+
+/* ============================================================
+   MINIMIZE-ON-SCROLL — collapse the tall app bar to a thin
+   strip (title + Connection/Form/Matter) when scrolling down,
+   restore on scroll-up / near the top. No layout is animated
+   (a single instant reflow), so scrolling stays smooth.
+   ============================================================ */
+let _lastY = 0, _mini = false;
+function setMini(on){ if(on!==_mini){ _mini=on; document.body.classList.toggle('mini', on); } }
+function autoMini(){
+  const y = els.scroll.scrollTop, dy = y - _lastY;
+  if(y < 70){ setMini(false); _lastY = y; return; }   // always full near the top
+  if(dy > 8) setMini(true);                            // scrolling down -> minimize
+  else if(dy < -8) setMini(false);                     // scrolling up   -> restore
+  if(Math.abs(dy) > 3) _lastY = y;
 }
+
 function syncOverlays(){
   if(!els.scroll||!els.headerInner) return;
-  els.headerInner.style.transform="translateX("+(-els.scroll.scrollLeft)+"px)";
-  els.axisInner.style.transform="translateY("+(-els.scroll.scrollTop)+"px)";
+  const sl = els.scroll.scrollLeft, st = els.scroll.scrollTop;
+  els.headerInner.style.transform = "translateX("+(-sl)+"px) scale("+zoom+")";
+  els.axisInner.style.transform   = "translateY("+(HEADH*(zoom-1) - st)+"px) scale("+zoom+")";
 }
 document.addEventListener("DOMContentLoaded",init);
 </script>
